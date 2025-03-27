@@ -1,9 +1,13 @@
+require('dotenv').config(); // Load .env file
+
 const mongoose = require('mongoose');
 
+const mongoURI = process.env.MONGO_URI; // Read from environment variable
 
-const connectDb = mongoose.connect('mongodb+srv://smeetagrawal23:smeetagrawal@cluster0.ymojbvc.mongodb.net/')
-.then(()=>console.log("Database connected")) // if your database has auth 
-.catch((err)=>console.log(err));
-
-
-module.exports = connectDb;
+mongoose
+  .connect(mongoURI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("✅ MongoDB Connected Successfully"))
+  .catch((err) => console.error("❌ MongoDB Connection Error:", err));
