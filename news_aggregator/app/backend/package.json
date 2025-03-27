@@ -6,7 +6,8 @@
   "scripts": {
     "test": "jest --watchAll --detectOpenHandles",
     "dev": "nodemon src/index.js",
-    "vercel-build": "echo 'Skipping build step'"
+    "start": "node src/index.js",
+     "postinstall": "npm rebuild bcrypt --build-from-source"
   },
   "keywords": [],
   "author": "",
