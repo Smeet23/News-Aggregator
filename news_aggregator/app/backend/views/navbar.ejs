@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, width=device-width" />
+    <link rel="stylesheet" href="/styles/homepage_global.css" />
+    <link rel="stylesheet" href="/styles/homepage_index.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap"
+    />
+    <title>Your News Aggregator</title>
+  </head>
+  <body>
+    <div class="home-desktop" data-animate-on-scroll>
+      <div class="header">
+        <img class="header-child" alt="" src="" />
+          <button class="home" onclick="redirectToUrl('/home')">Home</button>
+          <button class="search" onclick="redirectToUrl('/search')">Search</button>
+          <button class="create-post" onclick="redirectToUrl('/createpost')">Create Post</button>
+        
+          <button class="profile" onclick="redirectToUrl('/profile')"><img src="/images/profile.png"
+            ></button>
+
+      </div>
+
+      <script>
+        function redirectToUrl(url) {
+          window.location.href = url;
+        }
+      </script>
+      
+    </body>
