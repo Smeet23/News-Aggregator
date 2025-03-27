@@ -1,6 +1,6 @@
 const User = require("../model/UserModel");
 const asyncHandler = require("express-async-handler");
-const bcrypt = require("bcrypt");
+const bcrypt = require('bcryptjs');  
 const jwt = require("jsonwebtoken");
 const sendEmail = require("../../utils/sendEmail");
 const path = require("path");
