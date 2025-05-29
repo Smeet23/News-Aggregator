@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile</title>
+    <link rel="stylesheet" href="/styles/profile_index.css" />
+    <link rel="stylesheet" href="/styles/homepage_global.css" />
+    <link rel="stylesheet" href="/styles/homepage_index.css" />
+  </head>
+
+  <body>
+    <div class="home-desktop" data-animate-on-scroll>
+      <div class="header">
+        <img class="header-child" alt="" src="" />
+        <button class="home" onclick="redirectToUrl('/home')" style="font-weight: bold;">Home</button>
+        <button class="search" onclick="redirectToUrl('/search')" style="font-weight: bold;">Search</button>
+        <button class="create-post" onclick="redirectToUrl('/createpost')" style="font-weight: bold;">Create Post</button>
+        <button class="profile" onclick="redirectToUrl('/profile')">
+          <img src="/images/profile.png" />
+        </button>
+      </div>
+
+      <div class="container">
+        <div class="form">
+          <b>Username:</b> <%= user.name %><br /><br />
+          <b>Email:</b> <%= user.email %><br /><br />
+          <b><a href="/profile/followers/<%= user._id %>">Followers:</a></b> <%= user.followers.length %><br /><br />
+          <b><a href="/profile/following/<%= user._id %>">Following:</a></b> <%= user.following.length %><br /><br />
+
+
+          <% if (!isMyProfile) { %>
+            <form action="/profile/<%= isFollowing ? 'unfollow' : 'follow' %>/<%= user._id %>" method="POST">
+              <button style="padding: 8px 16px; font-weight: bold;">
+                <%= isFollowing ? 'Unfollow' : 'Follow' %>
+              </button>
+            </form>
+          <% } %>
+        </div>
+      </div>
+
+      <div class="dishes" id="postsContainer">
+        <!-- Dynamic user posts will be loaded here -->
+      </div>
+    </div>
+
+    <script>
+      function redirectToUrl(fullUrl) {
+        window.location.href = fullUrl;
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const postsContainer = document.getElementById("postsContainer");
+        const baseURL = window.location.origin;
+        const userid = "<%= user._id %>";
+
+        fetch(baseURL + "/post/getpost/" + userid)
+          .then((response) => response.json())
+          .then((posts) => {
+            const p = posts.posts;
+
+            p.forEach((post) => {
+              const postElement = document.createElement("div");
+              postElement.className = "cardsfood-card";
+
+              const PostPageUrl = `${baseURL}/home/posts/${post._id}`;
+              postElement.innerHTML = `
+                <div>
+                  <button class="usa-today">${post.user.name}</button>
+                </div>
+                <div>
+                  <button class="if-benjamin-netanyahu-led" onclick="redirectToUrl('${PostPageUrl}')">${post.title}</button>
+                </div>
+                <div>
+                  <div class="react-container">
+                    <img class="react" src="/images/upvote.png" style="height: 1.5rem; margin-right: 0.5rem;">
+                    <p class="reaction-count">${post.upvote}</p>
+                  </div>
+                  <div class="react-container">
+                    <img class="react" src="/images/downvote.png" style="height: 1.5rem; margin-right: 0.5rem;">
+                    <p class="reaction-count">${post.downvote}</p>
+                  </div>
+                  <div class="react-container">
+                    <img class="react" src="/images/comment.png" style="height: 1.5rem; margin-right: 0.5rem;">
+                    <p class="reaction-count">${post.noofreplies}</p>
+                  </div>
+                </div>
+              `;
+
+              postsContainer.appendChild(postElement);
+            });
+          })
+          .catch((error) => console.error("Error fetching posts:", error));
+      });
+    </script>
+  </body>
+</html>
