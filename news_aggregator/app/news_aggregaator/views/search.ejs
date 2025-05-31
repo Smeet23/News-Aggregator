@@ -9,17 +9,7 @@
     <link rel="stylesheet" href="/styles/Search_page_index.css">
 </head>
 <body>
-    <div class="home-desktop" data-animate-on-scroll>
-    <div class="header">
-      <img class="header-child" alt="" src="" />
-        <button class="home" onclick="redirectToUrl('/home')" style="font-weight: bold;">Home</button>
-        <button class="search" onclick="redirectToUrl('/search')" style="font-weight: bold;">Search</button>
-        <button class="create-post" onclick="redirectToUrl('/createpost')" style="font-weight: bold;">Create Post</button>
-      
-        <button class="profile" onclick="redirectToUrl('/profile')"><img src="/images/profile.png"
-          ></button>
-
-    </div>
+<%- include('navbar.ejs') %>
 
     <div class="searchbox">
         <img class="searchimg" src="/images/search.jpg" alt="">

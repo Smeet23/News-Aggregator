@@ -12,18 +12,9 @@
     <title>Your News Aggregator</title>
   </head>
   <body>
-    <!-- <%- include('navbar.ejs') %> -->
-    <div class="home-desktop" data-animate-on-scroll>
-      <div class="header">
-        <img class="header-child" alt="" src="" />
-          <button class="home" onclick="redirectToUrl('/home')">Home</button>
-          <button class="search" onclick="redirectToUrl('/search')">Search</button>
-          <button class="create-post" onclick="redirectToUrl('/createpost')">Create Post</button>
-        
-          <button class="profile" onclick="redirectToUrl('/profile')"><img src="/images/profile.png"
-            ></button>
+    
+  <%- include('navbar.ejs') %>
 
-      </div>
 
       <di3v class="dishes" id="postsContainer">
         <!-- Dynamic content will be added here -->
@@ -119,6 +110,21 @@
       function redirectToUrl(fullUrl) {
     window.location.href = fullUrl;
 }
+
+
+
+
+  function toggleDropdown() {
+    const dropdown = document.getElementById("dropdownMenu");
+    dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+  }
+
+  window.onclick = function(event) {
+    if (!event.target.closest('.dropdown')) {
+      document.getElementById("dropdownMenu").style.display = "none";
+    }
+  }
+
 
 
     </script>

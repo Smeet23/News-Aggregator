@@ -25,6 +25,13 @@ posts: [
 
 followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' }],
 following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' }],
+bio: { type: String, default: '' },
+linkedin: { type: String, default: '' },
+twitter: { type: String, default: '' },
+notifyFollow: { type: Boolean, default: true },
+notifyComment: { type: Boolean, default: true },
+profileImage: { type: String }, // Store image filename or URL
+
 
 }, {timestamps:true})
 

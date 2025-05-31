@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, width=device-width" />
+    <link rel="stylesheet" href="/styles/homepage_global.css" />
+    <link rel="stylesheet" href="/styles/homepage_index.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap"
+    />
+    <title>Your Notifications</title>
+    <style>
+      .notification-list {
+        padding: 2rem;
+        margin-top: 2rem;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+        background-color: #f8f9fa;
+        border-radius: 1rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .notification-item {
+        border-bottom: 1px solid #ddd;
+        padding: 1rem 0;
+      }
+
+      .notification-item:last-child {
+        border-bottom: none;
+      }
+
+      .notification-message {
+        font-weight: bold;
+      }
+
+      .notification-time {
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      .notification-unread {
+        color: red;
+        font-weight: bold;
+      }
+
+      h1 {
+        text-align: center;
+        margin-top: 2rem;
+        font-size: 2rem;
+      }
+    </style>
+  </head>
+  <body>
+<%- include('navbar.ejs') %>
+      <h1>Your Notifications</h1>
+      <div class="notification-list">
+        <ul>
+          <% notifications.forEach(notification => { %>
+            <li class="notification-item">
+              <div class="notification-message"><%= notification.message %></div>
+              <div class="notification-time"><%= new Date(notification.createdAt).toLocaleString() %></div>
+              <% if (!notification.isRead) { %>
+                <div class="notification-unread">• Unread</div>
+              <% } %>
+            </li>
+          <% }) %>
+        </ul>
+      </div>
+    </div>
+
+    <script>
+      function redirectToUrl(fullUrl) {
+        window.location.href = fullUrl;
+      }
+
+       function toggleDropdown() {
+    const dropdown = document.getElementById("dropdownMenu");
+    dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+  }
+
+  window.onclick = function(event) {
+    if (!event.target.closest('.dropdown')) {
+      document.getElementById("dropdownMenu").style.display = "none";
+    }
+  }
+    </script>
+  </body>
+</html>

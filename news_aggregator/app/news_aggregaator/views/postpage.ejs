@@ -13,21 +13,7 @@
     />
   </head>
   <body>
-    <div class="home-desktop" data-animate-on-scroll>
-      <div class="header">
-        <img class="header-child" alt="" src="" />
-          <button class="home" onclick="redirectToUrl('/home')">Home</button>
-          <button class="search" onclick="redirectToUrl('/search')">Search</button>
-          <button class="create-post" onclick="redirectToUrl('/createpost')">Create Post</button>
-        
-          <button class="profile" onclick="redirectToUrl('/profile')"><img src="/images/profile.png"
-            ></button>
-            <script> 
-            function redirectToUrl(fullUrl) {
-    window.location.href = fullUrl;
-            }
-            </script>
-      </div>
+    <%- include('navbar.ejs') %>
 
     <div class="post-page">
       <!-- Main post content -->

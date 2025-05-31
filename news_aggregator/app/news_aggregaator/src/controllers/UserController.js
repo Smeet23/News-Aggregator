@@ -8,12 +8,12 @@ const path = require("path");
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
   if (!name || !email || !password) {
-    return res.status(400).send({ error: "All Fields are mandatory" }); 
+    return res.status(400).send({ message: "All Fields are mandatory" }); 
   }
 
   const availableUser = await User.findOne({ email });
   if (availableUser) {
-    return res.status(409).send({ error: "User already registered" }); 
+    return res.status(409).send({ message: "User already registered" }); 
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);

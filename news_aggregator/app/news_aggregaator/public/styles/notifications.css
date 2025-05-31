@@ -1,0 +1,24 @@
+.container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 1rem;
+  font-family: sans-serif;
+}
+
+.notification-list {
+  list-style: none;
+  padding: 0;
+}
+
+.notification-list li {
+  background: #f0f0f0;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+}
+
+.timestamp {
+  float: right;
+  font-size: 0.85rem;
+  color: #666;
+}

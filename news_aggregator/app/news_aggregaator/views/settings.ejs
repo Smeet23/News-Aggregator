@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account Settings</title>
+  <link rel="stylesheet" href="/styles/homepage_global.css" />
+  <link rel="stylesheet" href="/styles/homepage_index.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" />
+  <style>
+    .settings-container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 2rem;
+      background-color: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      font-family: 'Poppins', sans-serif;
+    }
+    .settings-container h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .settings-container label {
+      display: block;
+      margin: 12px 0 6px;
+      font-weight: bold;
+    }
+    .settings-container input[type="text"],
+    .settings-container input[type="email"],
+    .settings-container input[type="password"],
+    .settings-container input[type="file"],
+    .settings-container textarea,
+    .settings-container select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+    }
+    .settings-container button {
+      margin-top: 1.5rem;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      width: 100%;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .settings-container button:hover {
+      background-color: #0056b3;
+    }
+    .danger-button {
+      background-color: #dc3545;
+      margin-top: 10px;
+    }
+    .settings-container .section-title {
+      margin-top: 2rem;
+      font-size: 1.2rem;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+  <%- include('navbar.ejs') %>
+  <% if (success_msg.length > 0) { %>
+  <div style="background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; max-width: 600px; margin: 10px auto;">
+    <%= success_msg[0] %>
+  </div>
+<% } %>
+
+<% if (error_msg.length > 0) { %>
+  <div style="background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; max-width: 600px; margin: 10px auto;">
+    <%= error_msg[0] %>
+  </div>
+<% } %>
+
+  <div class="settings-container">
+    <h1>Account Settings</h1>
+
+    <form action="/user/settings" method="POST" enctype="multipart/form-data">
+      <label>Profile Picture:</label>
+      <input type="file" name="profileImage" accept="image/*" />
+
+      <label>Name:</label>
+      <input type="text" name="name" value="<%= user.name %>" required />
+
+      <label>Email:</label>
+      <input type="email" name="email" value="<%= user.email %>" required />
+
+      <button type="button" id="changePasswordBtn" data-email="<%= user.email %>">Change Password</button>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const changeBtn = document.getElementById("changePasswordBtn");
+    if (changeBtn) {
+      changeBtn.addEventListener("click", function () {
+        const email = changeBtn.getAttribute("data-email");
+        const url = `/user/resetpassword/send-email?email=${encodeURIComponent(email)}`;
+        window.location.href = url;
+      });
+    }
+  });
+</script>
+
+
+
+      <label class="section-title">Bio:</label>
+      <textarea name="bio" rows="3" placeholder="Tell us about yourself..."><%= user.bio || '' %></textarea>
+
+      <label>LinkedIn URL:</label>
+      <input type="text" name="linkedin" value="<%= user.linkedin || '' %>" placeholder="https://linkedin.com/in/yourprofile" />
+
+      <label>Twitter URL:</label>
+      <input type="text" name="twitter" value="<%= user.twitter || '' %>" placeholder="https://twitter.com/yourhandle" />
+
+      <label class="section-title">Notification Preferences:</label>
+      <label><input type="checkbox" name="notifyFollow" <%= user.notifyFollow ? 'checked' : '' %> /> Notify me when someone follows me</label>
+      <label><input type="checkbox" name="notifyComment" <%= user.notifyComment ? 'checked' : '' %> /> Notify me on comments</label>
+
+      <button type="submit">Save Changes</button>
+    </form>
+
+    <form action="/delete-account" method="POST">
+      <button class="danger-button" type="submit">Delete My Account</button>
+    </form>
+  </div>
+</body>
+</html>

@@ -10,38 +10,14 @@
   </head>
 
   <body>
-    <div class="home-desktop" data-animate-on-scroll>
-      <div class="header">
-        <img class="header-child" alt="" src="" />
-        <button
-          class="home"
-          onclick="redirectToUrl('/home')"
-          style="font-weight: bold"
-        >
-          Home
-        </button>
-        <button
-          class="search"
-          onclick="redirectToUrl('/search')"
-          style="font-weight: bold"
-        >
-          Search
-        </button>
-        <button
-          class="create-post"
-          onclick="redirectToUrl('/createpost')"
-          style="font-weight: bold"
-        >
-          Create Post
-        </button>
-
-        <button class="profile"><img src="/images/profile.png" /></button>
-      </div>
-
+   <%- include('navbar.ejs') %>
       <div class="container">
         <div class="form">
           <b>Username: </b><%= user.name %><br /><br />
           <b>Email: </b><%= user.email %>
+          <br>
+          <br>
+          <b><a href="/notifications">🔔 Notifications</a></b>
           <br>
           <br>
           <b><a href="/profile/followers/<%= user._id %>">Followers:</a></b> <%= user.followers.length %><br /><br />

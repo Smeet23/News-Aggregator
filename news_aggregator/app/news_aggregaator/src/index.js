@@ -3,7 +3,29 @@ const express = require("express");
 require("../src/config/DbConnection");
 const app = express();
 const jwt = require("jsonwebtoken");
+const session = require('express-session');
+const flash = require('connect-flash');
 const asyncHandler = require("express-async-handler");
+// Session setup
+app.use(session({
+  secret: 'your_secret_key', // change to a strong secret
+  resave: false,
+  saveUninitialized: false
+}));
+
+// Flash messages
+app.use(flash());
+
+
+// Make flash messages available in all views
+app.use((req, res, next) => {
+  const success = req.flash('success_msg');
+  const error = req.flash('error_msg');
+  console.log('MIDDLEWARE FLASH', { success, error });
+  res.locals.success_msg = success;
+  res.locals.error_msg = error;
+  next();
+});
 
 const UserRoutes = require("./routes/UserRoutes");
 const PostRoutes = require("./routes/PostRoutes");
@@ -14,6 +36,7 @@ const ProfileRoutes = require("./routes/ProfileRoutes");
 const cookieParser = require("cookie-parser");
 const path = require("path");
 
+
 console.log({ path: path.resolve(__dirname, "../.env") });
 const dotenv = require("dotenv").config({
   path: path.resolve(__dirname, "../.env"),
@@ -22,6 +45,8 @@ const dotenv = require("dotenv").config({
 app.set("view engine", "ejs"); // To parse .ejs from view
 app.use(cookieParser());
 app.use(express.json());
+app.use('/uploads', express.static('uploads'));
+
 app.use(express.urlencoded({ extended: false }));
 // app.set('view engine', 'ejs');
 
@@ -85,6 +110,14 @@ app.use("/home", HomeRoutes);
 app.use("/search", SearchRoutes);
 app.use("/comments", CommentRoutes);
 app.use("/profile", ProfileRoutes);
+
+
+
+
+
+
+
+
 //process.env.PORT
 const server = app.listen(port, () => {
   console.log("Server listening on port " + port + "✅");

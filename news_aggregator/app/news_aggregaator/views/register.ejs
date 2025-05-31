@@ -94,27 +94,25 @@
                 password: password
             };
 
-            fetch('/user/register', {  // Updated endpoint to /user/register
+            fetch('/user/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(userData)
             })
-                .then(response => {
-                    if (response.ok) {
-                        console.log('User registered successfully');
-                        // Handle the response as needed
-                        window.location.href = '/login';
-                    } else {
-                        throw new Error('Invalid details. Registration failed.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error registering user:', error);
-                    // Handle errors as needed
-                    alert(error.message);
-                });
+            .then(async response => {
+                if (response.ok) {
+                    window.location.href = '/login';
+                } else {
+                    const data = await response.json();
+                    throw new Error(data.message || 'Registration failed');
+                }
+            })
+            .catch(error => {
+                alert(error.message);
+            });
+
         });
     </script>
 

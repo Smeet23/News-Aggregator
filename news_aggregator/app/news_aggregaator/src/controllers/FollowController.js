@@ -1,4 +1,6 @@
 const User = require("../model/UserModel");
+const Notification = require('../model/Notification');
+const sendEmail = require('../../utils/sendEmail');
 
 const followUser = async (req, res) => {
   try {
@@ -23,6 +25,21 @@ const followUser = async (req, res) => {
     // Update both users
     target.followers.push(userId);
     user.following.push(targetId);
+
+    //Notification 
+    await Notification.create({
+    user: target._id,
+    type: 'follow',
+    message: `${user.name} started following you.`,
+    fromUser: userId
+  });
+  // Send Mail
+  // await sendEmail(
+  //   target.email,
+  //   "You have a new follower!",
+  //   `<p>${user.name} just followed you on NewsAggregator.</p>`
+  // );
+
 
     await target.save();
     await user.save();

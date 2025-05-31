@@ -12,22 +12,44 @@
     <title>Your News Aggregator</title>
   </head>
   <body>
-    <div class="home-desktop" data-animate-on-scroll>
-      <div class="header">
-        <img class="header-child" alt="" src="" />
-          <button class="home" onclick="redirectToUrl('/home')">Home</button>
-          <button class="search" onclick="redirectToUrl('/search')">Search</button>
-          <button class="create-post" onclick="redirectToUrl('/createpost')">Create Post</button>
-        
-          <button class="profile" onclick="redirectToUrl('/profile')"><img src="/images/profile.png"
-            ></button>
+       <div class="home-desktop" data-animate-on-scroll>
+  <div class="header">
+    <img class="header-child" alt="" src="" />
+    <button class="home" onclick="redirectToUrl('/home')">Home</button>
+    <button class="search" onclick="redirectToUrl('/search')">Search</button>
+    <button class="create-post" onclick="redirectToUrl('/createpost')">Create Post</button>
 
+    <!-- Dropdown for Notification + Profile -->
+    <div class="dropdown">
+      <button class="profile-dropdown-btn" onclick="toggleDropdown()">
+        <img src="/images/profile.png" alt="Menu">
+      </button>
+      <div class="dropdown-content" id="dropdownMenu">
+        <a href="/user/notifications">Notifications</a>
+        <a href="/profile">Profile</a>
+        <a href="/user/settings">Settings</a>
+        <a href="/user/logout">Logout</a>
       </div>
+    </div>
+  </div>
+</div>
 
       <script>
         function redirectToUrl(url) {
           window.location.href = url;
         }
+
+              
+       function toggleDropdown() {
+    const dropdown = document.getElementById("dropdownMenu");
+    dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+  }
+
+  window.onclick = function(event) {
+    if (!event.target.closest('.dropdown')) {
+      document.getElementById("dropdownMenu").style.display = "none";
+    }
+  }
       </script>
       
     </body>
