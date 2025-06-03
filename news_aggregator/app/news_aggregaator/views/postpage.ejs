@@ -1,385 +1,814 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="initial-scale=1, width=device-width" />
-    <title>postpage</title>
-    <!-- <link rel="stylesheet" href="/styles/global.css" /> -->
-    <link rel="stylesheet" href="/styles/postpage.css" />
-    <!-- <link rel="stylesheet" href="/styles/index_1.css" /> -->
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap"
-    />
-  </head>
-  <body>
-    <%- include('navbar.ejs') %>
-
-    <div class="post-page">
-      <!-- Main post content -->
-      <div class="post">
-        <!-- Post content -->
-        <div class="username-xyz">Posted by : <%= user.name %></div>
-        <div class="title-this-container">
-          <p><%= post.title %></p>
-        </div>
-        <div class="title-body">
-          <p><%= post.content%></p>
-        </div>
-        <div><a href="<%= post.link %>" target="_blank">Link</a></div>
-
-        <script>
-
-          // Get the container element where the link will be displayed
-          const linkContainer = document.getElementById("linkContainer");
-
-          // Check if backendLink is not null and create the link element
-          if (backendLink !== null) {
-            const linkElement = document.createElement("a");
-            linkElement.href = backendLink;
-            linkElement.textContent = "Click here"; // Set the link text, change this as needed
-
-            // Append the link element to the link container
-            linkContainer.appendChild(linkElement);
-          } else {
-            // If backendLink is null, display a message or handle it in any other way you want
-            linkContainer.textContent = "No link available"; // You can display a message or handle it differently
-          }
-        </script>
-        <!-- Upvote, downvote, comment buttons -->
-        <p></p>
-        <button class="frame-child upvote">Upvote</button>
-        <button class="frame-inner downvote">Downvote</button>
-        <div id="voteCounts">
-          Upvotes: <span id="upvoteCount"><%= post.upvote %></span><br />
-          Downvotes: <span id="downvoteCount"><%= post.downvote %></span>
-        </div>
-
-        <a>Comments : <%= post.noofreplies %></a>
-
-        <script>
-          const id = "<%= post._id %>";
-          // Function to handle vote actions
-          function castVote(voteType) {
-            console.log(voteType);
-            const requestOptions = {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ vote: voteType }), // Sending vote in the request body
-            };
-            fetch("/home/post/vote/" + id, requestOptions) // Send request to backend with vote type
-              .then((response) => response.json())
-              .then((data) => {
-                const value = data.response;
-                const upvoteCount = data.uc;
-                const downvoteCount = data.dc;
-
-                // Update vote counts in the UI
-                document.getElementById("upvoteCount").innerText = upvoteCount;
-                document.getElementById("downvoteCount").innerText =
-                  downvoteCount;
-
-                // Update button states based on the received value
-                const upvoteButton = document.querySelector(".upvote");
-                const downvoteButton = document.querySelector(".downvote");
-
-                if (value === 1) {
-                  upvoteButton.innerText = "Upvoted";
-                  downvoteButton.innerText = "Downvote";
-                } else if (value === -1) {
-                  upvoteButton.innerText = "Upvote";
-                  downvoteButton.innerText = "Downvoted";
-                } else {
-                  upvoteButton.innerText = "Upvote";
-                  downvoteButton.innerText = "Downvote";
-                }
-              })
-              .catch((error) => {
-                console.error("Error:", error);
-              });
-          }
-
-          // Event listeners for upvote and downvote buttons
-          document
-            .querySelector(".upvote")
-            .addEventListener("click", function () {
-              castVote(1); // 1 represents upvote
-            });
-
-          document
-            .querySelector(".downvote")
-            .addEventListener("click", function () {
-              castVote(-1); // -1 represents downvote
-            });
-        </script>
-      </div>
-
-      <!-- Comments section -->
-      <div class="comments-container">
-        <div class="comment">
-          <div class="comment-header">
-            <img
-              class="comment-avatar"
-              src="/images/comment.png"
-              alt="User Avatar"
-            />
-            <div class="comment-username">Comment</div>
-          </div>
-          <div class="comment-text"></div>
-          <!-- <div class="comment-footer">
-            <button class="reply-btn">Reply</button>
-            <button class="view-replies-btn">View Replies</button>
-          </div> -->
-          <form class="reply-form">
-            <textarea
-              id="reply-textarea"
-              class="reply-textarea"
-              placeholder="Your reply..."
-            ></textarea>
-            <button onclick="sendReply()">Post Reply</button>
-          </form>
-
-          <script>
-            function sendReply() {
-              const textareaValue =
-                document.getElementById("reply-textarea").value;
-              const postid = "<%= post._id %>";
-              fetch("/post/CreateComment/" + postid, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ comment: textareaValue }),
-              })
-                .then((response) => {
-                  // Handle response here
-                  console.log("Reply sent to backend:", response);
-                  location.reload();
-                })
-                .catch((error) => {
-                  // Handle error here
-                  console.error("Error sending reply:", error);
-                });
-            }
-          </script>
-
-          <div class="replies-container">
-            <!-- Nested replies -->
-            <div class="comment">
-              <!-- Nested reply content -->
-              <div class="comment-header">
-                <img
-                  class="comment-avatar"
-                  src="/images/discuss.png"
-                  alt="User Avatar"
-                />
-                <div class="comment-username">Discussion Forum</div>
-              </div>
-
-              <!-- Start of nested comments section -->
-              <div class="comments-container" id="comments-container">
-                <script>
-                  function generateComments(parentId, depth, id) {
-                    let p;
-                    const newUrl = window.location.origin;
-
-                    const pid = "<%= post._id %>";
-
-                    if (id) {
-                      url = newUrl + "/post/comments/" + id;
-                    } else {
-                      url = newUrl + "/post/ShowComment/" + pid; //access by postid;
-                    }
-
-                    fetch(url)
-                      .then((response) => response.json())
-                      .then((posts) => {
-                        p = posts.replies;
-
-                        // console.log(Array.isArray(p));
-                        console.log(p);
-                        // console.log(typeof posts);
-                        // console.log(posts);
-
-                        const numComments = p.length;
-                        const commentsContainer =
-                          document.getElementById(parentId);
-
-                        for (let i = 0; i < numComments; i++) {
-                          // console.log(p[i]._id);
-                          let commentId = `${p[i]._id}`;
-                          let replyFormId = `reply-form-${commentId}`;
-                          let repliesContainerId = `replies-${commentId}`;
-
-                          let comment = document.createElement("div");
-                          comment.className = "comment";
-                          comment.id = commentId;
-                          comment.innerHTML = `
-              <div class="comment-header">
-                <img class="comment-avatar" src="/images/discuss.png" alt="User Avatar" />
-                <span class="comment-username">User : ${p[i].username}</span>
-              </div>
-              <p class="comment-text">${p[i].content}.</p>
-              <div class="comment-footer">
-                <button class="reply-btn" onclick="toggleReplyForm('${replyFormId}')">Reply</button>
-
-                <button class="view-replies-btn" onclick="toggleReplies('${repliesContainerId}')">View Replies</button>
-                <span class="viewreplies">${p[i].noofreplies}</span>
-
-                <button class="upvote-btn" onclick="vote(1,'${p[i]._id}')">Upvote</button>
-                <span class="upvote-count">${p[i].upvote}</span> 
-  
-                <button class="downvote-btn" onclick="vote(-1,'${p[i]._id}')">Downvote</button>
-                <span class="downvote-count">${p[i].downvote}</span> 
-              </div>
-              <div class="reply-form" id="${replyFormId}" style="display: none;">
-                <textarea class="reply-textarea" placeholder="Type your reply..."></textarea>
-                <button class="post-reply-btn" onclick="postReply('${replyFormId}', '${commentId}')">Post</button>
-              </div>
-              <div class="replies-container" id="${repliesContainerId}" style="display: none;"></div>
-            `;
-
-                          commentsContainer.appendChild(comment);
-
-                          // Recursively generate replies
-                          generateComments(
-                            repliesContainerId,
-                            depth + 1,
-                            p[i]._id
-                          );
-                        }
-                      })
-                      .catch((error) =>
-                        console.error("Error fetching posts:", error)
-                      );
-                  }
-
-                  // Generate comments and replies
-                  generateComments("comments-container", 0, null);
-                </script>
-              </div>
-              <!-- End of nested comments section -->
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <script>
-      function vote(action, commenId) {
-        fetch(`/comments/vote/${commenId}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ vote: action }),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            // Update UI based on response
-            updateVoteCounts(commenId, data.uc, data.dc);
-            updateVoteStatus(commenId, data.response);
-          })
-          .catch((error) => {
-            console.error("Error:", error);
-          });
-      }
-      // ************************************************************************************************************************
-
-      // ************************************************************************************************************************
-
-      function updateVoteCounts(commentId, upvotes, downvotes) {
-        document
-          .getElementById(commentId)
-          .querySelector(".upvote-count").textContent = upvotes;
-        document
-          .getElementById(commentId)
-          .querySelector(".downvote-count").textContent = downvotes;
-      }
-
-      function updateVoteStatus(commentId, value) {
-        const upvoteButton = document
-          .getElementById(commentId)
-          .querySelector(".upvote-btn");
-        const downvoteButton = document
-          .getElementById(commentId)
-          .querySelector(".downvote-btn");
-
-    
-      }
-      function toggleReplyForm(formId) {
-        // Toggle the visibility of the reply form for the clicked comment
-        var replyForm = document.getElementById(formId);
-        if (replyForm) {
-          replyForm.style.display =
-            replyForm.style.display === "none" ? "block" : "none";
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Page - Clean & Light</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-      }
 
-      function toggleReplies(repliesId) {
-        // Toggle the visibility of the replies container for the clicked comment
-        var repliesContainer = document.getElementById(repliesId);
-        if (repliesContainer) {
-          repliesContainer.style.display =
-            repliesContainer.style.display === "none" ? "block" : "none";
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #fafbfc;
+            color: #2c3e50;
+            line-height: 1.6;
+            min-height: 100vh;
         }
-      }
 
-      function postReply(replyFormId, commentId) {
-        const replyForm = document.getElementById(replyFormId);
-        const replyTextArea = replyForm.querySelector(".reply-textarea");
-        const replyContent = replyTextArea.value;
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
 
-        const parentId = commentId; // Assuming commentId is the parent comment ID
-        const url = window.location.origin;
-        console.log(parentId);
-        fetch(url + "/comments/replytocomment/" + `${parentId}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ comment: replyContent }),
-        })
-          .then((response) => {
-            if (response.ok) {
-              return response.json(); // You might handle the response data if needed
+        /* Post Container */
+        .post-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+            overflow: hidden;
+            border: 1px solid #e8ecef;
+        }
+
+        /* Post Header */
+        .post-header {
+            padding: 25px 30px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .author-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .author-avatar {
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .author-info {
+            flex: 1;
+        }
+
+        .author-name {
+            font-weight: 500;
+            font-size: 15px;
+            margin-bottom: 3px;
+        }
+
+        .post-time {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+
+        .post-title {
+            font-size: 24px;
+            font-weight: 600;
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        /* Post Content */
+        .post-content {
+            padding: 30px;
+        }
+
+        .post-body {
+            font-size: 16px;
+            line-height: 1.7;
+            color: #4a5568;
+            margin-bottom: 25px;
+        }
+
+        .post-body p {
+            margin-bottom: 15px;
+        }
+
+        .post-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 10px 18px;
+            background: #f7faff;
+            border: 1px solid #e3f2fd;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .post-link:hover {
+            background: #e3f2fd;
+            transform: translateY(-1px);
+        }
+
+        /* Post Actions */
+        .post-actions {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .vote-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .vote-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: 1px solid #dee2e6;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            color: #495057;
+        }
+
+        .vote-btn:hover {
+            background: #f8f9fa;
+            transform: translateY(-1px);
+        }
+
+        .vote-btn.upvoted {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .vote-btn.downvoted {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .vote-stats {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Comments Section */
+        .comments-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e8ecef;
+            overflow: hidden;
+        }
+
+        .comments-header {
+            padding: 20px 30px;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .comments-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Comment Form */
+        .comment-form {
+            padding: 25px 30px;
+            background: #fafbfc;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .comment-input {
+            width: 100%;
+            min-height: 100px;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            background: white;
+            transition: all 0.2s ease;
+        }
+
+        .comment-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .comment-submit-btn {
+            margin-top: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .comment-submit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Individual Comments */
+        .comment {
+            padding: 25px 30px;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .comment:last-child {
+            border-bottom: none;
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .comment-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            color: #8b4513;
+        }
+
+        .comment-user {
+            font-weight: 500;
+            color: #2c3e50;
+            font-size: 15px;
+        }
+
+        .comment-time {
+            color: #6c757d;
+            font-size: 12px;
+        }
+
+        .comment-text {
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
+
+        .comment-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .comment-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 5px 10px;
+            border: none;
+            background: transparent;
+            color: #6c757d;
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .comment-btn:hover {
+            background: #f8f9fa;
+            color: #495057;
+        }
+
+        /* Nested Comments */
+        .replies {
+            margin-left: 40px;
+            margin-top: 20px;
+            border-left: 3px solid #e9ecef;
+            padding-left: 20px;
+        }
+
+        .reply-form {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .reply-input {
+            width: 100%;
+            min-height: 80px;
+            padding: 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 13px;
+            resize: vertical;
+            background: white;
+        }
+
+        .reply-submit {
+            margin-top: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .reply-submit:hover {
+            background: #5a6fd8;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
             }
-            throw new Error("Network response was not ok.");
-          })
-          .then((data) => {
-            // Handle success - maybe update UI or perform other actions
-            console.log("Reply posted:", data);
 
-            // Assuming you want to update the UI after posting the reply
-            const newReplyElement = document.createElement("div");
-            newReplyElement.className = "comment";
-            let newcommentId = `${data._id}`;
-            let newreplyFormId = `reply-form-${newcommentId}`;
-            let newrepliesContainerId = `replies-${newcommentId}`;
-            newReplyElement.innerHTML = `
-                <div class="comment-header">
-                    <img class="comment-avatar" src="/images/comment.png" alt="User Avatar" />
-                    <span class="comment-username">User : ${data.username}</span>
+            .post-header,
+            .post-content,
+            .post-actions,
+            .comment-form,
+            .comment {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+
+            .post-title {
+                font-size: 20px;
+            }
+
+            .post-actions {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .vote-buttons {
+                order: 2;
+            }
+
+            .vote-stats {
+                order: 1;
+            }
+
+            .replies {
+                margin-left: 20px;
+                padding-left: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .post-header {
+                padding: 20px 15px;
+            }
+
+            .post-content,
+            .comment-form,
+            .comment {
+                padding: 20px 15px;
+            }
+
+            .post-actions {
+                padding: 15px;
+            }
+
+            .vote-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .replies {
+                margin-left: 10px;
+                padding-left: 10px;
+            }
+        }
+
+        /* Loading State */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+  <%- include('navbar.ejs') %>
+    <div class="container">
+        <!-- Main Post -->
+        <article class="post-container">
+            <header class="post-header">
+                <div class="author-section">
+                    <div class="author-avatar">JD</div>
+                    <div class="author-info">
+                        <div class="author-name">Posted by: John Doe</div>
+                        <div class="post-time">2 hours ago</div>
+                    </div>
                 </div>
-                <p class="comment-text">${data.content}.</p>
+                <h1 class="post-title">How to Build Amazing Web Applications with Modern Technologies</h1>
+            </header>
+
+            <div class="post-content">
+                <div class="post-body">
+                    <p>Welcome to this comprehensive guide on building modern web applications! In this post, we'll explore the latest technologies and best practices that will help you create stunning, responsive, and user-friendly websites.</p>
+                    
+                    <p>Whether you're a beginner just starting out or an experienced developer looking to upgrade your skills, this guide covers everything you need to know about modern web development, from frontend frameworks to backend architectures.</p>
+                </div>
                 
+                <a href="#" class="post-link" target="_blank">
+                    <i class="fas fa-external-link-alt"></i>
+                    Read Full Article
+                </a>
+            </div>
+
+            <footer class="post-actions">
+                <div class="vote-buttons">
+                    <button class="vote-btn upvote-btn" onclick="castVote(1)">
+                        <i class="fas fa-arrow-up"></i>
+                        Upvote
+                    </button>
+                    <button class="vote-btn downvote-btn" onclick="castVote(-1)">
+                        <i class="fas fa-arrow-down"></i>
+                        Downvote
+                    </button>
+                </div>
+                <div class="vote-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-arrow-up" style="color: #28a745;"></i>
+                        <span id="upvoteCount">156</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-arrow-down" style="color: #dc3545;"></i>
+                        <span id="downvoteCount">12</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-comment" style="color: #667eea;"></i>
+                        <span id="commentCount">24</span> Comments
+                    </div>
+                </div>
+            </footer>
+        </article>
+
+        <!-- Comments Section -->
+        <section class="comments-section">
+            <header class="comments-header">
+                <h2 class="comments-title">
+                    <i class="fas fa-comments"></i>
+                    Join the Discussion
+                </h2>
+            </header>
+
+            <!-- Add Comment Form -->
+            <div class="comment-form">
+                <textarea 
+                    id="reply-textarea" 
+                    class="comment-input" 
+                    placeholder="What are your thoughts? Share your opinion..."
+                ></textarea>
+                <button class="comment-submit-btn" onclick="sendReply()">
+                    <i class="fas fa-paper-plane"></i>
+                    Post Comment
+                </button>
+            </div>
+
+            <!-- Comments List -->
+            <div id="comments-container">
+                <!-- Sample Comment 1 -->
+                <div class="comment">
+                    <div class="comment-header">
+                        <div class="comment-avatar">AS</div>
+                        <div>
+                            <div class="comment-user">Alice Smith</div>
+                            <div class="comment-time">1 hour ago</div>
+                        </div>
+                    </div>
+                    <div class="comment-text">
+                        This is exactly what I was looking for! The explanation is clear and the examples are really helpful. Thanks for putting this together.
+                    </div>
+                    <div class="comment-actions">
+                        <button class="comment-btn" onclick="vote(1, 'comment1')">
+                            <i class="fas fa-thumbs-up"></i>
+                            <span class="upvote-count">8</span>
+                        </button>
+                        <button class="comment-btn" onclick="vote(-1, 'comment1')">
+                            <i class="fas fa-thumbs-down"></i>
+                            <span class="downvote-count">0</span>
+                        </button>
+                        <button class="comment-btn" onclick="toggleReplyForm('reply-form-1')">
+                            <i class="fas fa-reply"></i>
+                            Reply
+                        </button>
+                    </div>
+                    
+                    <!-- Reply Form -->
+                    <div id="reply-form-1" class="reply-form">
+                        <textarea class="reply-input" placeholder="Write your reply..."></textarea>
+                        <button class="reply-submit" onclick="postReply('reply-form-1', 'comment1')">Reply</button>
+                    </div>
+
+                    <!-- Nested Reply -->
+                    <div class="replies">
+                        <div class="comment">
+                            <div class="comment-header">
+                                <div class="comment-avatar">BJ</div>
+                                <div>
+                                    <div class="comment-user">Bob Johnson</div>
+                                    <div class="comment-time">45 minutes ago</div>
+                                </div>
+                            </div>
+                            <div class="comment-text">
+                                I completely agree! This guide saved me hours of research. Really appreciate the detailed examples.
+                            </div>
+                            <div class="comment-actions">
+                                <button class="comment-btn">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span class="upvote-count">3</span>
+                                </button>
+                                <button class="comment-btn">
+                                    <i class="fas fa-thumbs-down"></i>
+                                    <span class="downvote-count">0</span>
+                                </button>
+                                <button class="comment-btn">
+                                    <i class="fas fa-reply"></i>
+                                    Reply
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sample Comment 2 -->
+                <div class="comment">
+                    <div class="comment-header">
+                        <div class="comment-avatar">CD</div>
+                        <div>
+                            <div class="comment-user">Carol Davis</div>
+                            <div class="comment-time">2 hours ago</div>
+                        </div>
+                    </div>
+                    <div class="comment-text">
+                        Great post! Could you also cover deployment strategies in your next article? That would be really valuable for beginners.
+                    </div>
+                    <div class="comment-actions">
+                        <button class="comment-btn">
+                            <i class="fas fa-thumbs-up"></i>
+                            <span class="upvote-count">12</span>
+                        </button>
+                        <button class="comment-btn">
+                            <i class="fas fa-thumbs-down"></i>
+                            <span class="downvote-count">1</span>
+                        </button>
+                        <button class="comment-btn" onclick="toggleReplyForm('reply-form-2')">
+                            <i class="fas fa-reply"></i>
+                            Reply
+                        </button>
+                    </div>
+                    
+                    <div id="reply-form-2" class="reply-form">
+                        <textarea class="reply-input" placeholder="Write your reply..."></textarea>
+                        <button class="reply-submit" onclick="postReply('reply-form-2', 'comment2')">Reply</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Vote casting function
+        function castVote(voteType) {
+            console.log('Casting vote:', voteType);
+            
+            const upvoteBtn = document.querySelector('.upvote-btn');
+            const downvoteBtn = document.querySelector('.downvote-btn');
+            
+            // Add loading state
+            upvoteBtn.classList.add('loading');
+            downvoteBtn.classList.add('loading');
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Reset states
+                upvoteBtn.classList.remove('upvoted', 'loading');
+                downvoteBtn.classList.remove('downvoted', 'loading');
+                
+                // Update button states
+                if (voteType === 1) {
+                    upvoteBtn.classList.add('upvoted');
+                    upvoteBtn.innerHTML = '<i class="fas fa-arrow-up"></i> Upvoted';
+                    downvoteBtn.innerHTML = '<i class="fas fa-arrow-down"></i> Downvote';
+                    
+                    // Update count
+                    const count = document.getElementById('upvoteCount');
+                    count.textContent = parseInt(count.textContent) + 1;
+                } else {
+                    downvoteBtn.classList.add('downvoted');
+                    downvoteBtn.innerHTML = '<i class="fas fa-arrow-down"></i> Downvoted';
+                    upvoteBtn.innerHTML = '<i class="fas fa-arrow-up"></i> Upvote';
+                    
+                    // Update count
+                    const count = document.getElementById('downvoteCount');
+                    count.textContent = parseInt(count.textContent) + 1;
+                }
+            }, 300);
+        }
+
+        // Send reply function
+        function sendReply() {
+            const textarea = document.getElementById('reply-textarea');
+            const content = textarea.value.trim();
+            
+            if (!content) {
+                alert('Please enter your comment');
+                return;
+            }
+            
+            const submitBtn = document.querySelector('.comment-submit-btn');
+            submitBtn.classList.add('loading');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Posting...';
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Create new comment
+                const newComment = createComment({
+                    user: 'You',
+                    content: content,
+                    time: 'Just now',
+                    upvotes: 0,
+                    downvotes: 0
+                });
+                
+                // Add to container
+                const container = document.getElementById('comments-container');
+                container.insertBefore(newComment, container.firstChild);
+                
+                // Clear textarea
+                textarea.value = '';
+                
+                // Update comment count
+                const commentCount = document.getElementById('commentCount');
+                commentCount.textContent = parseInt(commentCount.textContent) + 1;
+                
+                // Reset button
+                submitBtn.classList.remove('loading');
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Post Comment';
+                
+                // Add animation
+                newComment.classList.add('fade-in');
+            }, 600);
+        }
+
+        // Create comment element
+        function createComment(data) {
+            const comment = document.createElement('div');
+            comment.className = 'comment';
+            
+            const initials = data.user.split(' ').map(n => n[0]).join('').toUpperCase();
+            
+            comment.innerHTML = `
+                <div class="comment-header">
+                    <div class="comment-avatar">${initials}</div>
+                    <div>
+                        <div class="comment-user">${data.user}</div>
+                        <div class="comment-time">${data.time}</div>
+                    </div>
+                </div>
+                <div class="comment-text">${data.content}</div>
+                <div class="comment-actions">
+                    <button class="comment-btn">
+                        <i class="fas fa-thumbs-up"></i>
+                        <span class="upvote-count">${data.upvotes}</span>
+                    </button>
+                    <button class="comment-btn">
+                        <i class="fas fa-thumbs-down"></i>
+                        <span class="downvote-count">${data.downvotes}</span>
+                    </button>
+                    <button class="comment-btn">
+                        <i class="fas fa-reply"></i>
+                        Reply
+                    </button>
+                </div>
             `;
+            
+            return comment;
+        }
 
-            const repliesContainer = document.getElementById(commentId);
-            repliesContainer.appendChild(newReplyElement);
+        // Toggle reply form
+        function toggleReplyForm(formId) {
+            const form = document.getElementById(formId);
+            if (form) {
+                form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            }
+        }
 
-            // Clear the textarea after posting
-            replyTextArea.value = "";
+        // Post reply
+        function postReply(formId, commentId) {
+            const form = document.getElementById(formId);
+            const textarea = form.querySelector('.reply-input');
+            const content = textarea.value.trim();
+            
+            if (!content) {
+                alert('Please enter your reply');
+                return;
+            }
+            
+            console.log(`Posting reply to ${commentId}: ${content}`);
+            
+            // Clear and hide form
+            textarea.value = '';
+            form.style.display = 'none';
+            
+            // Here you would typically make an API call to save the reply
+        }
 
-            // Optionally, hide the reply form after posting
-            replyForm.style.display = "none";
-          })
-          .catch((error) => {
-            console.error("Error posting reply:", error);
-          });
-      }
-      // JavaScript code for upvote and downvote button clicks
+        // Comment voting
+        function vote(action, commentId) {
+            console.log(`Voting ${action} on ${commentId}`);
+            // Implement your voting logic here
+        }
+
+        // Auto-resize textareas
+        document.addEventListener('input', function(e) {
+            if (e.target.matches('.comment-input, .reply-input')) {
+                e.target.style.height = 'auto';
+                e.target.style.height = e.target.scrollHeight + 'px';
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                if (e.target.id === 'reply-textarea') {
+                    sendReply();
+                }
+            }
+        });
     </script>
-  </body>
+</body>
 </html>

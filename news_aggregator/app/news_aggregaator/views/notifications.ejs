@@ -61,9 +61,6 @@
             <li class="notification-item">
               <div class="notification-message"><%= notification.message %></div>
               <div class="notification-time"><%= new Date(notification.createdAt).toLocaleString() %></div>
-              <% if (!notification.isRead) { %>
-                <div class="notification-unread">• Unread</div>
-              <% } %>
             </li>
           <% }) %>
         </ul>

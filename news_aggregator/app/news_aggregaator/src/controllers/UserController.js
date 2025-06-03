@@ -34,7 +34,7 @@ const registerUser = asyncHandler(async (req, res) => {
         email: user.email,
         password: user.hashedPassword,
       });
-    res.render("login");
+    // res.render("login");
   } else {
     res.status(400);
     throw new Error("User Data is not valid");

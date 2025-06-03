@@ -1,109 +1,470 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="initial-scale=1, width=device-width" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - Your App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <link rel="stylesheet" href="/styles/login_global.css" />
-    <link rel="stylesheet" href="/styles/login_index.css" />
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Nunito Sans:wght@400;600;700;800&display=swap" />
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: #334155;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            position: relative;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60"><defs><pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(255,255,255,0.02)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>');
+            pointer-events: none;
+        }
+
+        .brand-section {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(148, 163, 184, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .brand-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+
+        .brand-logo {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 2rem;
+        }
+
+        .brand-content {
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .brand-title {
+            font-size: 1.875rem;
+            font-weight: 600;
+           color: #f5f5f5;
+            margin-bottom: 1rem;
+        }
+
+        .brand-description {
+            font-size: 1rem;
+            color: #64748b;
+            margin-bottom: 2rem;
+        }
+
+        .hero-image {
+            width: 280px;
+            height: 280px;
+            opacity: 0.9;
+        }
+
+        .login-section {
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-header {
+            margin-bottom: 2rem;
+        }
+
+        .login-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-subtitle {
+            color: #64748b;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+            background-color: #ffffff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 2rem;
+        }
+
+        .forgot-link {
+            color: #3b82f6;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .forgot-link:hover {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background-color: #1e293b;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .login-button:hover {
+            background-color: #0f172a;
+        }
+
+        .login-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .signup-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .signup-text {
+            color: #64748b;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .signup-link {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .signup-link:hover {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .alert-error {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+        }
+
+        .alert-success {
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #16a34a;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .brand-section {
+                order: 2;
+                padding: 2rem 1.5rem;
+                border-right: none;
+                border-top: 1px solid #e2e8f0;
+            }
+
+            .login-section {
+                order: 1;
+                padding: 2rem 1.5rem;
+            }
+
+            .hero-image {
+                width: 200px;
+                height: 200px;
+            }
+
+            .brand-title {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .brand-section,
+            .login-section {
+                padding: 1.5rem 1rem;
+            }
+
+            .login-container {
+                max-width: 100%;
+            }
+
+            .hero-image {
+                width: 160px;
+                height: 160px;
+            }
+        }
+    </style>
 </head>
-
 <body>
-    <div class="divcontainer">
-        <div class="divcontainer-child"></div>
-        <div class="dont-have-an-account-parent">
-            <div class="dont-have-an-account">Don't have an account?</div>
-            <a class="login" href="#" onclick="redirectToLoginPage()">SignUp</a>
-        </div>
-        <img class="divcontainer-item" alt="" src="/images/group-1686550876.svg" />
-        <form id="loginForm">
-        <div class="frame-parent">
-            <div class="login-parent">
-                <b class="log_in">Login to Your Account</b>
-                <div></div>
+    <div class="container">
+        <div class="brand-section">
+            <img src="/images/group-1686550876.svg" alt="Logo" class="brand-logo">
+            <div class="brand-content">
+                <h1 class="brand-title">Welcome to Our Platform</h1>
+                <p class="brand-description">
+                    Secure access to your account. Built with enterprise-grade security and modern technology.
+                </p>
+                <img src="/images/2424701.svg" alt="Login illustration" class="hero-image">
             </div>
-            <div class="frame-group">
-                <div class="frame-container">
-                    <div class="email-parent">
-                        <div class="email">Email</div>
-                        <input id="emailInput" class="frame-child" placeholder="mail@abc.com" type="email" required/>
-                    </div>
-                    <div class="email-parent">
-                        <div class="email">Password</div>
-                        <input id="passwordInput" class="frame-child" placeholder="xyz123" type="password" required/>
-                    </div>
+        </div>
+
+        <div class="login-section">
+            <div class="login-container">
+                <div class="login-header">
+                    <h2 class="login-title">Sign in to your account</h2>
+                    <p class="login-subtitle">Enter your email and password to continue</p>
                 </div>
-                
-                <button id="loginButton" class="login-wrapper" autofocus="{true}">
-                    <div class="login1">Login</div>
-                </button>
-            </form>
-                <div class="checkbox-parent">
-                                <a class="forgot-password" href="/forgotpassword">Forgot Password?</a>
-                            </div>
+
+                <div id="alertMessage" class="alert"></div>
+
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="emailInput" class="form-label">Email address</label>
+                        <input 
+                            type="email" 
+                            id="emailInput" 
+                            class="form-input" 
+                            placeholder="Enter your email"
+                            required
+                            autocomplete="email"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="passwordInput" class="form-label">Password</label>
+                        <input 
+                            type="password" 
+                            id="passwordInput" 
+                            class="form-input" 
+                            placeholder="Enter your password"
+                            required
+                            autocomplete="current-password"
+                        >
+                    </div>
+
+                    <div class="form-options">
+                        <a href="/forgotpassword" class="forgot-link">Forgot your password?</a>
+                    </div>
+
+                    <button type="submit" id="loginButton" class="login-button">
+                        <span id="buttonText">Sign in</span>
+                    </button>
+                </form>
+
+                <div class="signup-section">
+                    <p class="signup-text">Don't have an account?</p>
+                    <a href="#" onclick="redirectToSignupPage()" class="signup-link">Create an account</a>
+                </div>
             </div>
         </div>
-        <img class="divcontainer-inner" alt="" src="/images/2424701.svg" />
     </div>
 
     <script>
-        function redirectToLoginPage() {
-    // You can add any additional actions or checks here before redirection
-    // For example, you can use window.location.href to redirect:
-             window.location.href = "/register";
+        function redirectToSignupPage() {
+            window.location.href = "/register";
         }
+
+        function showAlert(message, isError = false) {
+            const alertElement = document.getElementById('alertMessage');
+            alertElement.textContent = message;
+            alertElement.className = `alert ${isError ? 'alert-error' : 'alert-success'}`;
+            alertElement.style.display = 'block';
+
+            setTimeout(() => {
+                alertElement.style.display = 'none';
+            }, 5000);
+        }
+
+        function setLoading(isLoading) {
+            const button = document.getElementById('loginButton');
+            const buttonText = document.getElementById('buttonText');
+            
+            if (isLoading) {
+                button.disabled = true;
+                buttonText.innerHTML = '<span class="loading-spinner"></span>Signing in...';
+            } else {
+                button.disabled = false;
+                buttonText.textContent = 'Sign in';
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
-            var loginForm = document.getElementById('loginForm');
-    
-            loginForm.addEventListener('submit', function (event) {
-                event.preventDefault(); // Prevent the default form submission
-    
-                // Retrieve the input values
-                var email = document.getElementById('emailInput').value;
-                var password = document.getElementById('passwordInput').value;
-    
-                // Create an object with user login data
-                var userData = {
-                    email: email,
-                    password: password
-                };
-    
-                // Send a POST request to /user/login
-                fetch('/user/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(userData)
-                })
-                .then(response => {
+            const loginForm = document.getElementById('loginForm');
+
+            loginForm.addEventListener('submit', async function (event) {
+                event.preventDefault();
+
+                const email = document.getElementById('emailInput').value.trim();
+                const password = document.getElementById('passwordInput').value;
+
+                if (!email || !password) {
+                    showAlert('Please fill in all required fields', true);
+                    return;
+                }
+
+                setLoading(true);
+
+                try {
+                    const response = await fetch('/user/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ email, password })
+                    });
+
                     if (response.ok) {
-                        console.log('Login successful');
-                        // Redirect to the home page or perform other actions for successful login
-                        window.location.href = '/home';
+                        showAlert('Successfully signed in. Redirecting...');
+                        setTimeout(() => {
+                            window.location.href = '/home';
+                        }, 1000);
                     } else {
-                        console.log('Login failed');
-                        // Check for specific status codes that indicate invalid login
-                        if (response.status === 401) {
-                            alert('Invalid login credentials. Please try again.');
-                        } else {
-                            // Handle other server errors
-                            console.error('Server error:', response.statusText);
+                        let errorMessage = 'Sign in failed. Please try again.';
+                        
+                        switch (response.status) {
+                            case 401:
+                                errorMessage = 'Invalid email or password.';
+                                break;
+                            case 429:
+                                errorMessage = 'Too many attempts. Please try again later.';
+                                break;
+                            case 500:
+                                errorMessage = 'Server error. Please try again.';
+                                break;
                         }
+
+                        showAlert(errorMessage, true);
                     }
-                })
-                .catch(error => {
-                    console.error('Error during login:', error);
-                    // Handle other client-side errors
+                } catch (error) {
+                    console.error('Login error:', error);
+                    showAlert('Connection error. Please check your internet and try again.', true);
+                } finally {
+                    setLoading(false);
+                }
+            });
+
+            // Input validation
+            const inputs = document.querySelectorAll('.form-input');
+            inputs.forEach(input => {
+                input.addEventListener('invalid', function() {
+                    this.style.borderColor = '#dc2626';
+                });
+
+                input.addEventListener('input', function() {
+                    if (this.checkValidity()) {
+                        this.style.borderColor = '#d1d5db';
+                    }
                 });
             });
         });
     </script>
-    
-    
 </body>
-
 </html>

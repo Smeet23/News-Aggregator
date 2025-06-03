@@ -1,125 +1,593 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-    <link rel="stylesheet" href="/styles/profile_index.css" />
-    <link rel="stylesheet" href="/styles/homepage_global.css" />
-    <link rel="stylesheet" href="/styles/homepage_index.css" />
-  </head>
+    <title>Profile - <%= user.name %></title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  <body>
-   <%- include('navbar.ejs') %>
-      <div class="container">
-        <div class="form">
-          <b>Username: </b><%= user.name %><br /><br />
-          <b>Email: </b><%= user.email %>
-          <br>
-          <br>
-          <b><a href="/notifications">🔔 Notifications</a></b>
-          <br>
-          <br>
-          <b><a href="/profile/followers/<%= user._id %>">Followers:</a></b> <%= user.followers.length %><br /><br />
-          <b><a href="/profile/following/<%= user._id %>">Following:</a></b> <%= user.following.length %><br /><br />
-        </div>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            line-height: 1.6;
+            color: #2d3748;
+        }
 
-        <div class="buttons-container">
-          <button class="changepw" onclick="reset()">Change Password</button>
-          <button
-            class="changepw"
-            onclick="window.location.href='/user/logout'"
-          >
-            Sign Out
-          </button>
-          <script>
-            function reset() {
-               const email = "<%= user.email %>";
-              var url = `/user/resetpassword/send-email?email=${encodeURIComponent(
-                email
-              )}`;
-              redirectToUrl(url);
+        .profile-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 80px 20px 40px;
+        }
+
+        .profile-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 32px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 700;
+            color: white;
+            margin: 0 auto 24px;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+            border: 4px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .profile-info {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .profile-name {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .profile-email {
+            font-size: 1.1rem;
+            color: #718096;
+            margin-bottom: 24px;
+        }
+
+        .profile-stats {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            margin-bottom: 32px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-link {
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            display: block;
+            padding: 12px 16px;
+            border-radius: 12px;
+        }
+
+        .stat-link:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .notifications-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
+            margin-bottom: 24px;
+        }
+
+        .notifications-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(240, 147, 251, 0.4);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .action-btn {
+            flex: 1;
+            max-width: 200px;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .action-btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-change-password {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-change-password:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-sign-out {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-sign-out:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+        }
+
+        .action-btn:active {
+            transform: translateY(0);
+        }
+
+        .posts-section {
+            margin-top: 40px;
+        }
+
+        .section-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 1.2rem;
+        }
+
+        .posts-container {
+            display: grid;
+            gap: 20px;
+        }
+
+        .post-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .post-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .post-author {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: default;
+        }
+
+        .post-title {
+            background: none;
+            border: none;
+            color: #2d3748;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            padding: 0;
+            line-height: 1.4;
+            transition: color 0.3s ease;
+            margin-bottom: 16px;
+            display: block;
+            width: 100%;
+        }
+
+        .post-title:hover {
+            color: #667eea;
+        }
+
+        .post-stats {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .stat-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .stat-icon {
+            width: 18px;
+            height: 18px;
+            opacity: 0.7;
+        }
+
+        .stat-count {
+            font-weight: 500;
+        }
+
+        .loading-container {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+
+        .loading-spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .no-posts {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            color: #718096;
+            font-size: 1.1rem;
+        }
+
+        .no-posts-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .profile-container {
+                padding: 60px 16px 20px;
             }
-          </script>
+
+            .profile-header {
+                padding: 24px;
+                border-radius: 16px;
+            }
+
+            .profile-avatar {
+                width: 100px;
+                height: 100px;
+                font-size: 2.5rem;
+            }
+
+            .profile-name {
+                font-size: 1.75rem;
+            }
+
+            .profile-stats {
+                gap: 24px;
+            }
+
+            .stat-number {
+                font-size: 1.5rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-btn {
+                max-width: none;
+            }
+
+            .post-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .post-stats {
+                gap: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .profile-container {
+                padding: 40px 12px 20px;
+            }
+
+            .profile-header {
+                padding: 20px;
+            }
+
+            .profile-avatar {
+                width: 80px;
+                height: 80px;
+                font-size: 2rem;
+            }
+
+            .profile-name {
+                font-size: 1.5rem;
+            }
+
+            .profile-stats {
+                gap: 16px;
+                flex-direction: column;
+            }
+
+            .post-card {
+                padding: 20px;
+            }
+
+            .post-stats {
+                gap: 12px;
+            }
+        }
+
+        /* Custom SVG Icons */
+        .icon-upvote {
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2310b981'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M7 11l5-5m0 0l5 5m-5-5v12'/%3E%3C/svg%3E") no-repeat center;
+            background-size: contain;
+        }
+
+        .icon-downvote {
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ef4444'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M17 13l-5 5m0 0l-5-5m5 5V6'/%3E%3C/svg%3E") no-repeat center;
+            background-size: contain;
+        }
+
+        .icon-comment {
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%233b82f6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'/%3E%3C/svg%3E") no-repeat center;
+            background-size: contain;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('navbar.ejs') %>
+
+    <div class="profile-container">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <%= user.name.charAt(0).toUpperCase() %>
+            </div>
+            
+            <div class="profile-info">
+                <h1 class="profile-name"><%= user.name %></h1>
+                <p class="profile-email"><%= user.email %></p>
+                
+                <a href="/user/notifications" class="notifications-link">
+                    🔔 Notifications
+                </a>
+                
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <a href="/profile/followers/<%= user._id %>" class="stat-link">
+                            <span class="stat-number"><%= user.followers.length %></span>
+                            <span class="stat-label">Followers</span>
+                        </a>
+                    </div>
+                    <div class="stat-item">
+                        <a href="/profile/following/<%= user._id %>" class="stat-link">
+                            <span class="stat-number"><%= user.following.length %></span>
+                            <span class="stat-label">Following</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-btn btn-change-password" onclick="reset()">
+                    Change Password
+                </button>
+                <button class="action-btn btn-sign-out" onclick="window.location.href='/user/logout'">
+                    Sign Out
+                </button>
+            </div>
         </div>
-        <script>
-          function redirectToUrl(fullUrl) {
-            window.location.href = fullUrl;
-          }
 
-          function logout() {
-            fetch("/user/logout", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-            })
-              .then((response) => response.json())
-              .then((data) => {
-                console.log("Logout Success:", data);
-                // Redirect to the login page after successful logout
-                redirectToUrl("/login");
-              })
-              .catch((error) => {
-                console.error("Logout Error:", error);
-              });
-          }
-        </script>
-      </div>
-
-      <div class="dishes" id="postsContainer">
-        <!-- Dynamic content will be added here -->
-      </div>
+        <div class="posts-section">
+            <div class="section-header">My Posts</div>
+            
+            <div class="loading-container" id="loadingContainer">
+                <div class="loading-spinner"></div>
+                <p>Loading your posts...</p>
+            </div>
+            
+            <div class="posts-container" id="postsContainer" style="display: none;"></div>
+        </div>
     </div>
+
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const postsContainer = document.getElementById("postsContainer");
+        // Utility function for URL redirection
+        function redirectToUrl(fullUrl) {
+            window.location.href = fullUrl;
+        }
 
-        const baseURL = window.location.origin;
-        console.log("Base URL:", baseURL);
-        const userid = "<%= user._id %>";
-        fetch(baseURL + "/post/getpost/" + userid)
-          .then((response) => response.json())
-          .then((posts) => {
-            const p = posts.posts;
-            console.log(p);
+        // Reset password function
+        function reset() {
+            const email = "<%= user.email %>";
+            const url = `/user/resetpassword/send-email?email=${encodeURIComponent(email)}`;
+            redirectToUrl(url);
+        }
 
-            let PostPageUrl = "";
-            const url = baseURL + "/posts/";
-            p.forEach((post) => {
-              const postElement = document.createElement("div");
-              postElement.className = "cardsfood-card";
+        // Logout function (kept for potential future use)
+        function logout() {
+            fetch("/user/logout", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log("Logout Success:", data);
+                redirectToUrl("/login");
+            })
+            .catch((error) => {
+                console.error("Logout Error:", error);
+            });
+        }
 
-              PostPageUrl = url + "/${post._id}";
-              console.log(PostPageUrl);
-              postElement.innerHTML = `
-                            <div>
-                                <button class="usa-today" ">${post.user.name}</button>
+        // Load and display user posts
+        document.addEventListener("DOMContentLoaded", function () {
+            const postsContainer = document.getElementById("postsContainer");
+            const loadingContainer = document.getElementById("loadingContainer");
+
+            const baseURL = window.location.origin;
+            const userid = "<%= user._id %>";
+            
+            fetch(`${baseURL}/post/getpost/${userid}`)
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then((posts) => {
+                    loadingContainer.style.display = 'none';
+                    postsContainer.style.display = 'block';
+                    
+                    const p = posts.posts;
+                    console.log('Posts:', p);
+
+                    if (!p || p.length === 0) {
+                        postsContainer.innerHTML = `
+                            <div class="no-posts">
+                                <div class="no-posts-icon">📄</div>
+                                <p>No posts yet</p>
+                                <p>Share your first post to get started!</p>
                             </div>
-                            <div>
-                                <button class="if-benjamin-netanyahu-led" onclick="redirectToUrl('${baseURL}/home/posts/${post._id}')">${post.title}</button>
+                        `;
+                        return;
+                    }
+
+                    p.forEach((post) => {
+                        const postElement = document.createElement("div");
+                        postElement.className = "post-card";
+
+                        postElement.innerHTML = `
+                            <div class="post-header">
+                                <span class="post-author">${post.user.name}</span>
                             </div>
-                            <div>
-                                <div class="react-container">
-                                    <img class="react" src="/images/upvote.png" style="height: 1.5rem; margin-right: 0.5rem;">
-                                    <p class="reaction-count">${post.upvote}</p>
+                            
+                            <button class="post-title" onclick="redirectToUrl('${baseURL}/home/posts/${post._id}')">
+                                ${post.title}
+                            </button>
+                            
+                            <div class="post-stats">
+                                <div class="stat-group">
+                                    <div class="stat-icon icon-upvote"></div>
+                                    <span class="stat-count">${post.upvote || 0}</span>
                                 </div>
-                                <div class="react-container">
-                                    <img class="react" src="/images/downvote.png" style="height: 1.5rem; margin-right: 0.5rem;">
-                                    <p class="reaction-count">${post.downvote}</p>
+                                <div class="stat-group">
+                                    <div class="stat-icon icon-downvote"></div>
+                                    <span class="stat-count">${post.downvote || 0}</span>
                                 </div>
-                                <div class="react-container">
-                                    <img class="react" src="/images/comment.png" style="height: 1.5rem; margin-right: 0.5rem;">
-                                    <p class="reaction-count">${post.noofreplies}</p>
+                                <div class="stat-group">
+                                    <div class="stat-icon icon-comment"></div>
+                                    <span class="stat-count">${post.noofreplies || 0}</span>
                                 </div>
                             </div>
                         `;
 
-              postsContainer.appendChild(postElement);
-            });
-          })
-          .catch((error) => console.error("Error fetching posts:", error));
-      });
+                        postsContainer.appendChild(postElement);
+                    });
+                })
+                .catch((error) => {
+                    console.error("Error fetching posts:", error);
+                    loadingContainer.style.display = 'none';
+                    postsContainer.style.display = 'block';
+                    postsContainer.innerHTML = `
+                        <div class="no-posts">
+                            <div class="no-posts-icon">⚠️</div>
+                            <p>Error loading posts</p>
+                            <p>Please try refreshing the page</p>
+                        </div>
+                    `;
+                });
+        });
     </script>
-  </body>
+</body>
 </html>

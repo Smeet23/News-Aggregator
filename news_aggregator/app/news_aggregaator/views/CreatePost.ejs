@@ -1,95 +1,350 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="initial-scale=1, width=device-width" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Post</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-  <link rel="stylesheet" href="/styles/createpost_global.css" />
-  <link rel="stylesheet" href="/styles/createpost_index.css" />
-  <link rel="stylesheet" href="/styles/homepage_global.css" />
-  <link rel="stylesheet" href="/styles/homepage_index.css" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" />
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding-top: 60px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      color: #2d3748;
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      color: #718096;
+      font-size: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      color: #4a5568;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 16px 20px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: #fff;
+      font-family: inherit;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .form-input::placeholder {
+      color: #a0aec0;
+    }
+
+    .form-textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 16px;
+      margin-top: 32px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 16px 24px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: inherit;
+      text-decoration: none;
+      text-align: center;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: #f7fafc;
+      color: #4a5568;
+      border: 2px solid #e2e8f0;
+    }
+
+    .btn-secondary:hover {
+      background: #edf2f7;
+      border-color: #cbd5e0;
+      transform: translateY(-1px);
+    }
+
+    .loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .loading::after {
+      content: '';
+      width: 20px;
+      height: 20px;
+      border: 2px solid transparent;
+      border-top: 2px solid currentColor;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-left: 8px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .error-message {
+      background: #fee;
+      color: #c53030;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #e53e3e;
+      display: none;
+    }
+
+    .success-message {
+      background: #f0fff4;
+      color: #22543d;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #38a169;
+      display: none;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        padding-top: 20px;
+      }
+
+      .card {
+        padding: 24px;
+        margin: 0 10px;
+        border-radius: 16px;
+      }
+
+      .header h1 {
+        font-size: 1.75rem;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .btn {
+        padding: 14px 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+
+      .card {
+        padding: 20px;
+        margin: 0;
+      }
+
+      .header h1 {
+        font-size: 1.5rem;
+      }
+
+      .form-input {
+        padding: 14px 16px;
+      }
+    }
+  </style>
 </head>
 
 <body>
+  <!-- Include your navbar here -->
   <%- include('navbar.ejs') %>
-  <div class="rectangle-parent">
-    <img class="frame-child" alt="" src="images/rectangle-9636@2x.png" />
-    <!-- <img class="crss-1-icon" alt="" src="images/crss-1@2x.png" /> -->
 
-    <form id="createPostForm">
-      <input class="frame-item" type="text" name="content" placeholder="Add content...." />
-      <input class="frame-child1" type="text" name="title" placeholder="Add title..."  maxlength="270"/>
-      <input class="frame-child4" type="text" name="link" placeholder="Add link...." />
-      <button class="frame-child2" type="submit">Post</button>
-      <div class="frame-child3" id="cancelButton"></div>
-      <div class="cancel">Cancel</div>
-    </form>
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <h1>Create New Post</h1>
+        <p>Share your thoughts with the community</p>
+      </div>
 
+      <div class="error-message" id="errorMessage"></div>
+      <div class="success-message" id="successMessage"></div>
 
-    <script>
-      document.addEventListener('DOMContentLoaded', function () {
-        var createPostForm = document.getElementById('createPostForm');
-        var cancelButton = document.getElementById('cancelButton');
+      <form id="createPostForm">
+        <div class="form-group">
+          <label class="form-label" for="title">Title *</label>
+          <input 
+            class="form-input" 
+            type="text" 
+            name="title" 
+            id="title"
+            placeholder="Enter an engaging title..." 
+            maxlength="270"
+            required
+          />
+        </div>
 
-        createPostForm.addEventListener('submit', function (event) {
-          event.preventDefault(); // Prevent the default form submission
+        <div class="form-group">
+          <label class="form-label" for="content">Content *</label>
+          <textarea 
+            class="form-input form-textarea" 
+            name="content" 
+            id="content"
+            placeholder="What's on your mind? Share your story..."
+            required
+          ></textarea>
+        </div>
 
-          // Retrieve the input values
-          var content = createPostForm.elements['content'].value;
-          var title = createPostForm.elements['title'].value;
-          var link = createPostForm.elements['link'].value;
+        <div class="form-group">
+          <label class="form-label" for="link">Link (Optional)</label>
+          <input 
+            class="form-input" 
+            type="url" 
+            name="link" 
+            id="link"
+            placeholder="https://example.com"
+          />
+        </div>
 
-          // Check if mandatory fields are filled
-          if (!content || !title) {
-            alert('Please fill in both "Add content" and "Add title" fields.');
-            return;
-          }
+        <div class="button-group">
+          <button class="btn btn-secondary" type="button" id="cancelButton">
+            Cancel
+          </button>
+          <button class="btn btn-primary" type="submit" id="submitButton">
+            Create Post
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-          // Assuming jwtToken is retrieved from cookies
-          var jwtToken = getCookie('jwt'); // Define getCookie function
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById("createPostForm");
+    const cancelButton = document.getElementById("cancelButton");
 
-          fetch('/post/createpost', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json', // Specify the content type as JSON
-              'Authorization': 'Bearer ' + jwtToken, // Include the token in the Authorization header
-            },
-            body: JSON.stringify({ content, title ,link}), // Convert the data to JSON format
-          })
-            .then(response => response.json())
-            .then(data => {
-              console.log('Server Response:', data);
+    // ✅ This will fetch the JWT from cookies (like the working version)
+    function getCookie(name) {
+      const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+      if (match) return match[2];
+    }
 
-              // Handle the server response
-              if (data.success) {
-                alert('Post created successfully!');
-                window.location.href = '/home';
-              } else {
-                alert(data.message);
-                window.location.href = '/home';
-              }
-            })
-            .catch(error => {
-              console.error('Error:', error);
-              alert('An error occurred. Please try again.');
-            });
+    form.addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const content = form.elements["content"].value;
+      const title = form.elements["title"].value;
+      const link = form.elements["link"].value;
+
+      if (!content || !title) {
+        alert("Please fill in both 'Add content' and 'Add title' fields.");
+        return;
+      }
+
+      const jwtToken = getCookie("jwt");
+
+      try {
+        const response = await fetch("/post/createpost", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + jwtToken
+          },
+          body: JSON.stringify({ content, title, link })
         });
 
-        cancelButton.addEventListener('click', function () {
-          window.location.href = '/home';
-        });
+        const data = await response.json();
+        console.log("Server Response:", data);
 
-        // Function to get the value of a cookie by its name
-        function getCookie(name) {
-          var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-          if (match) return match[2];
+        if (data.success) {
+          alert("Post created successfully!");
+          window.location.href = "/home";
+        } else {
+          alert(data.message || "Something went wrong!");
+          window.location.href = "/home";
         }
-      });
+      } catch (error) {
+        console.error("Error:", error);
+        alert("An error occurred. Please try again.");
+      }
+    });
 
+    cancelButton.addEventListener("click", function () {
+      window.location.href = "/home";
+    });
+  });
+</script>
 
-    </script>
-  </body>
-
-  </html>
+</body>
+</html>

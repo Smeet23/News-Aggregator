@@ -3,108 +3,596 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Page</title>
-    <link rel="stylesheet" href="/styles/Search_page_global.css">
-    <link rel="stylesheet" href="/styles/homepage_index.css">
-    <link rel="stylesheet" href="/styles/Search_page_index.css">
+    <title>Search - Find Users & Posts</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            line-height: 1.6;
+            color: #2d3748;
+        }
+
+        .search-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 80px 20px 40px;
+        }
+
+        .search-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .search-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 12px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-subtitle {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 32px;
+        }
+
+        .search-box-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            opacity: 0.5;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 16px 16px 16px 50px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fff;
+            font-family: inherit;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .search-input::placeholder {
+            color: #a0aec0;
+        }
+
+        .search-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .search-btn {
+            flex: 1;
+            max-width: 200px;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .search-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .search-btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-user {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-user:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-post {
+            background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
+        }
+
+        .btn-post:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(5, 150, 105, 0.4);
+        }
+
+        .search-btn:active {
+            transform: translateY(0);
+        }
+
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .results-container {
+            margin-top: 40px;
+        }
+
+        .results-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .no-results {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            color: #718096;
+            font-size: 1.1rem;
+        }
+
+        .no-results-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .post-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .post-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .username-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .username-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .post-title {
+            background: none;
+            border: none;
+            color: #2d3748;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            padding: 0;
+            line-height: 1.4;
+            transition: color 0.3s ease;
+            margin-bottom: 16px;
+            display: block;
+            width: 100%;
+        }
+
+        .post-title:hover {
+            color: #667eea;
+        }
+
+        .post-stats {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .stat-icon {
+            width: 18px;
+            height: 18px;
+            opacity: 0.7;
+        }
+
+        .stat-count {
+            font-weight: 500;
+        }
+
+        .upvote-icon { color: #10b981; }
+        .downvote-icon { color: #ef4444; }
+        .comment-icon { color: #3b82f6; }
+
+        .error-message {
+            background: rgba(254, 226, 226, 0.95);
+            color: #c53030;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid #e53e3e;
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .search-container {
+                padding: 60px 16px 20px;
+            }
+
+            .search-title {
+                font-size: 2rem;
+            }
+
+            .search-box-container {
+                padding: 24px;
+                border-radius: 16px;
+            }
+
+            .search-buttons {
+                flex-direction: column;
+            }
+
+            .search-btn {
+                max-width: none;
+            }
+
+            .post-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .post-stats {
+                gap: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .search-container {
+                padding: 40px 12px 20px;
+            }
+
+            .search-title {
+                font-size: 1.75rem;
+            }
+
+            .search-box-container {
+                padding: 20px;
+            }
+
+            .post-card {
+                padding: 20px;
+            }
+
+            .post-stats {
+                gap: 12px;
+            }
+        }
+
+        /* Custom SVG Icons */
+        .icon-search {
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m21 21-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z'/%3E%3C/svg%3E") no-repeat center;
+            background-size: contain;
+        }
+
+        .icon-upvote {
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2310b981'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M7 11l5-5m0 0l5 5m-5-5v12'/%3E%3C/svg%3E") no-repeat center;
+            background-size: contain;
+        }
+
+        .icon-downvote {
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ef4444'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M17 13l-5 5m0 0l-5-5m5 5V6'/%3E%3C/svg%3E") no-repeat center;
+            background-size: contain;
+        }
+
+        .icon-comment {
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%233b82f6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'/%3E%3C/svg%3E") no-repeat center;
+            background-size: contain;
+        }
+    </style>
 </head>
 <body>
-<%- include('navbar.ejs') %>
+    <%- include('navbar.ejs') %>
 
-    <div class="searchbox">
-        <img class="searchimg" src="/images/search.jpg" alt="">
-        <input type="text" id="searchBox" placeholder="Enter Username or Keyword">
+    <div class="search-container">
+        <div class="search-header">
+            <h1 class="search-title">Discover & Explore</h1>
+            <p class="search-subtitle">Find users and posts across the community</p>
+        </div>
+
+        <div class="search-box-container">
+            <div class="search-input-wrapper">
+                <div class="search-icon icon-search"></div>
+                <input 
+                    type="text" 
+                    id="searchBox" 
+                    class="search-input"
+                    placeholder="Enter username or keyword to search..."
+                    autocomplete="off"
+                >
+            </div>
+
+            <div class="search-buttons">
+                <button onclick="searchUser()" class="search-btn btn-user" id="userBtn">
+                    Search Users
+                </button>
+                <button onclick="searchPost()" class="search-btn btn-post" id="postBtn">
+                    Search Posts
+                </button>
+            </div>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+        
+        <div class="results-container" id="resultsContainer" style="display: none;">
+            <div class="results-header" id="resultsHeader"></div>
+            <div id="searchResults"></div>
+        </div>
     </div>
 
-    <div class="buttonsforsearch">
-        <button onclick="searchUser()" class="searchuser">Search User</button>
-        <button onclick="searchPost()" class="searchpost">Search Post</button>
-    </div>
-    <div class="dishes" id="searchResults"></div>
-
-    
-    
-</div>
     <script>
+        let currentSearchType = '';
+
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Set loading state
+        function setLoading(buttonId, isLoading) {
+            const button = document.getElementById(buttonId);
+            if (isLoading) {
+                button.classList.add('loading');
+                button.disabled = true;
+            } else {
+                button.classList.remove('loading');
+                button.disabled = false;
+            }
+        }
+
+        // Enhanced search user function
         function searchUser() {
-            const username = document.getElementById('searchBox').value;
-            if (username.trim() === "") {
-                alert("Please enter a username");
+            const username = document.getElementById('searchBox').value.trim();
+            if (username === "") {
+                showError("Please enter a username to search");
                 return;
             }
 
-            console.log(username);
+            currentSearchType = 'users';
+            setLoading('userBtn', true);
+            
+            document.getElementById('resultsContainer').style.display = 'block';
+            document.getElementById('resultsHeader').textContent = `Searching for users: "${username}"...`;
 
-            fetch(`/search/searchuser/${username}`)
-                .then(response => response.json())
-                .then(posts => displayResults(posts))
-                .catch(error => console.error('Error:', error));
+            fetch(`/search/searchuser/${encodeURIComponent(username)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(posts => {
+                    displayResults(posts, 'users', username);
+                    setLoading('userBtn', false);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError('Failed to search users. Please try again.');
+                    setLoading('userBtn', false);
+                });
         }
 
+        // Enhanced search post function
         function searchPost() {
-            const keyword = document.getElementById('searchBox').value;
-            if (keyword.trim() === "") {
-                alert("Please enter a keyword");
+            const keyword = document.getElementById('searchBox').value.trim();
+            if (keyword === "") {
+                showError("Please enter a keyword to search");
                 return;
             }
 
-            console.log(keyword);
+            currentSearchType = 'posts';
+            setLoading('postBtn', true);
+            
+            document.getElementById('resultsContainer').style.display = 'block';
+            document.getElementById('resultsHeader').textContent = `Searching for posts: "${keyword}"...`;
 
-            fetch(`/search/searchpost/${keyword}`)
-                .then(response => response.json())
-                .then(posts => displayResults(posts))
-                .catch(error => console.error('Error:', error));
+            fetch(`/search/searchpost/${encodeURIComponent(keyword)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(posts => {
+                    displayResults(posts, 'posts', keyword);
+                    setLoading('postBtn', false);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError('Failed to search posts. Please try again.');
+                    setLoading('postBtn', false);
+                });
         }
 
-        function displayResults(posts) {
+        // Enhanced display results function
+        function displayResults(posts, type, query) {
             const resultsContainer = document.getElementById('searchResults');
-            resultsContainer.innerHTML = ""; // Clear previous results
+            const resultsHeader = document.getElementById('resultsHeader');
+            
+            resultsContainer.innerHTML = "";
 
             if (posts.length === 0) {
-                resultsContainer.innerHTML = "<p>No results found.</p>";
+                resultsHeader.textContent = `No ${type} found for "${query}"`;
+                resultsContainer.innerHTML = `
+                    <div class="no-results">
+                        <div class="no-results-icon">🔍</div>
+                        <p>No ${type} match your search criteria.</p>
+                        <p>Try adjusting your search terms or keywords.</p>
+                    </div>
+                `;
                 return;
             }
+
+            resultsHeader.textContent = `Found ${posts.length} ${type} for "${query}"`;
 
             posts.forEach(post => {
                 const postElement = document.createElement('div');
-                postElement.className = "cardsfood-card";
+                postElement.className = "post-card";
                 postElement.innerHTML = `
-
-                <div>
-                    <button class="usa-today" onclick="redirectToUrl('/profile/${post.userid}')">${post.username}</button>
-              </div>
-                
-              <div>
-                  <button class="if-benjamin-netanyahu-led" onclick="redirectToUrl('/home/posts/${post._id}')">${post.title}</button>
-              </div>
-              
-              <div>
-                <div>
-
-      <div class="react-container">
-        <img class="react" src="/images/upvote.png" style="height: 1.5rem; margin-right: 0.5rem;">
-        <p class="reaction-count">${post.upvote}</p>
-    </div>
-    <div class="react-container">
-        <img class="react" src="/images/downvote.png" style="height: 1.5rem; margin-right: 0.5rem;">
-        <p class="reaction-count">${post.downvote}</p>
-    </div>
-    <div class="react-container">
-        <img class="react" src="/images/comment.png" style="height: 1.5rem; margin-right: 0.5rem;">
-
-        <p class="reaction-count">${post.noofreplies}</p>
-    </div>
-</div>
-
-</div>`;
+                    <div class="post-header">
+                        <button class="username-btn" onclick="redirectToUrl('/profile/${post.userid}')">
+                            @${post.username}
+                        </button>
+                    </div>
+                    
+                    <button class="post-title" onclick="redirectToUrl('/home/posts/${post._id}')">
+                        ${post.title}
+                    </button>
+                    
+                    <div class="post-stats">
+                        <div class="stat-item">
+                            <div class="stat-icon icon-upvote"></div>
+                            <span class="stat-count">${post.upvote || 0}</span>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon icon-downvote"></div>
+                            <span class="stat-count">${post.downvote || 0}</span>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon icon-comment"></div>
+                            <span class="stat-count">${post.noofreplies || 0}</span>
+                        </div>
+                    </div>
+                `;
                 resultsContainer.appendChild(postElement);
             });
         }
 
+        // Redirect function
         function redirectToUrl(fullUrl) {
-          window.location.href = fullUrl;
+            window.location.href = fullUrl;
         }
-    </script>
 
+        // Enter key search
+        document.getElementById('searchBox').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                // Default to post search if no previous search type
+                if (currentSearchType === 'users') {
+                    searchUser();
+                } else {
+                    searchPost();
+                }
+            }
+        });
+
+        // Auto-focus search input
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('searchBox').focus();
+        });
+    </script>
 </body>
 </html>
