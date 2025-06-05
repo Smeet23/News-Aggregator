@@ -4,6 +4,8 @@ require("../src/config/DbConnection");
 const app = express();
 const jwt = require("jsonwebtoken");
 const session = require('express-session');
+const newsRoutes = require('./routes/UserRoutes');
+const { startNewsScheduler } = require('../src/scheduler/newsScheduler');
 const flash = require('connect-flash');
 const asyncHandler = require("express-async-handler");
 // Session setup
@@ -47,7 +49,11 @@ app.use(cookieParser());
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
+app.use('/api', newsRoutes);
 app.use(express.urlencoded({ extended: false }));
+if (process.env.ENABLE_NEWS_SCHEDULER === 'true') {
+  startNewsScheduler();
+}
 // app.set('view engine', 'ejs');
 
 // console.log(__dirname);

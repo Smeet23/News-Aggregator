@@ -151,16 +151,21 @@ const ResetPassword = async (req, res) => {
     res.status(500).json({ message: "An error occurred" });
   }
 };
+
 const logout = async (req, res) => {
   try {
     console.log("Success.");
     res.clearCookie("jwt");
-    // res.send({ message: "Logged out successfully" });
-    res.redirect("/login");
+    if (req.headers.accept.includes('application/json')) {
+      res.json({ message: "Logged out successfully" });
+    } else {
+      res.redirect("/login");
+    }
   } catch (err) {
     res.status(401).send(err);
   }
 };
+
 const newpassword = async (req, res) => {
   const { newP, confP, email } = req.body;
 
