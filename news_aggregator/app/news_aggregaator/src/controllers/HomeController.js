@@ -10,7 +10,7 @@ const Home = async(req, res) => {
 }
 const HomePage =  async (req, res) => {
     try {
-        const posts = await Post.find().select('userid title content upvote downvote noofreplies').lean(); // Fetch posts
+        const posts = await Post.find().select('userid title content upvote downvote noofreplies createdAt').lean(); // Fetch posts
 
         // Get unique user IDs from posts
         const userIds = posts.map(post => post.userid);
