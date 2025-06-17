@@ -6,8 +6,11 @@ const jwt = require("jsonwebtoken");
 const session = require('express-session');
 const newsRoutes = require('./routes/UserRoutes');
 const { startNewsScheduler } = require('../src/scheduler/newsScheduler');
+const cookieParser = require("cookie-parser");
 const flash = require('connect-flash');
 const asyncHandler = require("express-async-handler");
+const validateToken = require("./middleware/validateToken");
+app.use(cookieParser());
 // Session setup
 app.use(session({
   secret: 'your_secret_key', // change to a strong secret
@@ -35,7 +38,7 @@ const HomeRoutes = require("./routes/HomeRoutes");
 const SearchRoutes = require("./routes/SearchRoutes");
 const CommentRoutes = require("./routes/CommentRoutes");
 const ProfileRoutes = require("./routes/ProfileRoutes");
-const cookieParser = require("cookie-parser");
+
 const path = require("path");
 
 
@@ -45,7 +48,7 @@ const dotenv = require("dotenv").config({
 });
 
 app.set("view engine", "ejs"); // To parse .ejs from view
-app.use(cookieParser());
+
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
@@ -60,18 +63,9 @@ if (process.env.ENABLE_NEWS_SCHEDULER === 'true') {
 // console.log(express.static(path.join(__dirname)));
 app.use(express.static(path.join(__dirname, "../public")));
 
-app.get( "/", asyncHandler(async (req, res, next) => {
-    let token = req.cookies.jwt;
-    console.log("Token:", token);
-    if (!token) {
-      console.error("Token not found");
-      res.redirect("login");
-      res.status(400);
-      throw new Error("Token not found");
-    }
-    res.render('home');
-  })
-);
+app.get("/", validateToken, (req, res) => {
+  res.render("home");
+});
 
 app.get("/register", (req, res) => {
   res.render("register");
@@ -83,31 +77,13 @@ app.get("/forgotpassword", (req, res) => {
   res.render("ForgotPassword");
 });
 
-app.get("/createpost", asyncHandler(async (req, res, next) => {
-  let token = req.cookies.jwt;
-  console.log("Token:", token);
-  if (!token) {
-    console.error("Token not found");
-    res.redirect("login");
-    res.status(400);
-    throw new Error("Token not found");
-  }
-  res.render('CreatePost');
-})
-);
+app.get("/createpost", validateToken, (req, res) => {
+  res.render("CreatePost");
+});
 
-app.get("/search", asyncHandler(async (req, res, next) => {
-  let token = req.cookies.jwt;
-  console.log("Token:", token);
-  if (!token) {
-    console.error("Token not found");
-    res.redirect("login");
-    res.status(400);
-    throw new Error("Token not found");
-  }
-  res.render('search');
-})
-);
+app.get("/search", validateToken, (req, res) => {
+  res.render("search");
+});
 
 const port = process.env.PORT || 3000;
 app.use("/user", UserRoutes);

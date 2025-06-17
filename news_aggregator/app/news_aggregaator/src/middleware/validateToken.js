@@ -7,10 +7,7 @@ const validateToken = asyncHandler(async (req, res, next) => {
 
     if (!token) {
         console.error("Token not found");
-        res.redirect('login');
-        res.status(400);
-        throw new Error("Token not found");
-   
+        return res.redirect('/login'); // ✅ immediately return after redirect
     }
 
     const keyy = process.env.ACCESS_TOKEN_SECRET || "newsagr21";
@@ -18,12 +15,11 @@ const validateToken = asyncHandler(async (req, res, next) => {
     jwt.verify(token, keyy, (err, decoded) => {
         if (err) {
             console.error("Token verification failed:", err.message);
-            res.status(401).render('login'); // Respond with a status code and render login page
-            return;
+            return res.redirect('/login'); // ✅ early return on failure
         }
 
         req.user = decoded.user;
-        next();
+        next(); // ✅ continue if valid
     });
 });
 
