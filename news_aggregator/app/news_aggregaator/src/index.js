@@ -1,5 +1,7 @@
 const express = require("express");
 const path = require("path");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 
 // Load environment variables FIRST, before anything else
 const envFile = process.env.NODE_ENV === 'production' 
@@ -20,6 +22,27 @@ if (dotenv.error) {
 require("../src/config/DbConnection");
 
 const app = express();
+
+// Security middleware - Apply helmet for security headers
+app.use(helmet({
+  contentSecurityPolicy: false, // Disable for now as it may conflict with your views
+}));
+
+// Setup logging
+const { setupLogging } = require('./middleware/logger');
+setupLogging(app);
+
+// Rate limiting middleware
+const limiter = rateLimit({
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // limit each IP to 100 requests per windowMs
+  message: "Too many requests from this IP, please try again later."
+});
+
+// Apply rate limiting to API routes
+app.use('/api/', limiter);
+app.use('/user/', limiter);
+app.use('/post/', limiter);
 const jwt = require("jsonwebtoken");
 const session = require('express-session');
 const newsRoutes = require('./routes/UserRoutes');
@@ -108,12 +131,14 @@ app.use("/search", SearchRoutes);
 app.use("/comments", CommentRoutes);
 app.use("/profile", ProfileRoutes);
 
+// Import error handlers
+const { errorHandler, notFound } = require('./middleware/errorHandler');
 
+// 404 handler - must be after all other routes
+app.use(notFound);
 
-
-
-
-
+// Global error handler - must be last middleware
+app.use(errorHandler);
 
 //process.env.PORT
 const server = app.listen(port, () => {

@@ -3,7 +3,7 @@ const router = express.Router();
 const{
     myProfile,
     Profile
-} = require("../controllers/ProfileContoller");
+} = require("../controllers/ProfileController");
 const validateToken = require("../middleware/validateToken");
 const upload = require("../../utils/multer");
 const {followUser,unfollowUser,getFollowersList,getFollowingList}  = require("../controllers/FollowController");
