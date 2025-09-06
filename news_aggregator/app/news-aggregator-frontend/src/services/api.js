@@ -46,17 +46,21 @@ export const authAPI = {
   login: (credentials) => api.post('/user/login', credentials),
   register: (userData) => api.post('/user/register', userData),
   logout: () => api.get('/user/logout'),
-  forgotPassword: (email) => api.post('/user/forgotpassword', { email }),
-  resetPassword: (data) => api.post('/user/resetpassword', data),
+  forgotPassword: (email) => api.post('/user/forgotpassword/', { email }),
+  resetPassword: (data) => api.post('/user/newpassword/', data),
+  getNotifications: () => api.get('/user/notifications'),
+  getSettings: () => api.get('/user/settings'),
+  updateSettings: (settings) => api.post('/user/settings', settings),
+  deleteAccount: () => api.post('/user/delete-account'),
 };
 
 // Post APIs
 export const postAPI = {
-  getAllPosts: () => api.get('/home/posts'),
+  getAllPosts: () => api.get('/home/posts/'),
   getPost: (id) => api.get(`/home/posts/${id}`),
-  createPost: (postData) => api.post('/post/create', postData),
-  updatePost: (id, postData) => api.put(`/post/update/${id}`, postData),
-  deletePost: (id) => api.delete(`/post/delete/${id}`),
+  getPostDetail: (id) => api.get(`/post/getpost/${id}`), // Backend specific endpoint
+  createPost: (postData) => api.post('/post/createpost', postData),
+  deletePost: (id) => api.delete(`/post/deletePost/${id}`),
   votePost: (id, vote) => api.post(`/home/post/vote/${id}`, { vote }),
   uploadImage: (formData) => api.post('/post/upload', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
@@ -65,22 +69,24 @@ export const postAPI = {
 
 // Comment APIs
 export const commentAPI = {
-  getComments: (postId) => api.get(`/comments/${postId}`),
-  createComment: (postId, content) => api.post(`/comments/create/${postId}`, { content }),
-  deleteComment: (commentId) => api.delete(`/comments/delete/${commentId}`),
+  getComments: (postId) => api.get(`/post/comments/${postId}`),
+  createComment: (postId, content) => api.post(`/post/CreateComment/${postId}`, { content }),
+  showComment: (commentId) => api.get(`/post/ShowComment/${commentId}`),
+  replyToComment: (commentId, content) => api.post(`/comments/replytocomment/${commentId}`, { content }),
+  showReplies: (commentId) => api.get(`/comments/showreplies/${commentId}`),
+  voteComment: (commentId, vote) => api.post(`/comments/vote/${commentId}`, { vote }),
 };
 
 // Search API
 export const searchAPI = {
-  searchPosts: (keyword) => api.get(`/search/posts`, { params: { keyword } }),
-  searchUsers: (keyword) => api.get(`/search/users`, { params: { keyword } }),
+  searchPosts: (keyword) => api.get(`/search/searchpost/${encodeURIComponent(keyword)}`),
+  searchUsers: (username) => api.get(`/search/searchuser/${encodeURIComponent(username)}`),
 };
 
 // Profile APIs
 export const profileAPI = {
   getProfile: (userId) => api.get(`/profile/${userId}`),
-  getMyProfile: () => api.get('/profile'),
-  updateProfile: (profileData) => api.put('/profile/update', profileData),
+  getMyProfile: () => api.get('/profile/'),
   followUser: (userId) => api.post(`/profile/follow/${userId}`),
   unfollowUser: (userId) => api.post(`/profile/unfollow/${userId}`),
   getFollowers: (userId) => api.get(`/profile/followers/${userId}`),

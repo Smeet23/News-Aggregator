@@ -10,6 +10,11 @@ import Navbar from './components/common/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import PostDetail from './pages/PostDetail';
+import CreatePost from './pages/CreatePost';
+import Profile from './pages/Profile';
+import Search from './pages/Search';
+import Settings from './pages/Settings';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -113,17 +118,22 @@ function App() {
             }
           />
           
-          {/* Placeholder routes for future pages */}
+          {/* Post Detail Page */}
+          <Route
+            path="/post/:id"
+            element={
+              <Layout>
+                <PostDetail />
+              </Layout>
+            }
+          />
+          
+          {/* Search Page */}
           <Route
             path="/search"
             element={
               <Layout>
-                <div className="min-h-screen pt-20 flex items-center justify-center">
-                  <div className="text-center">
-                    <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Search Page</h1>
-                    <p className="text-gray-600 dark:text-gray-400">Coming soon...</p>
-                  </div>
-                </div>
+                <Search />
               </Layout>
             }
           />
@@ -133,30 +143,30 @@ function App() {
             element={
               <ProtectedRoute>
                 <Layout>
-                  <div className="min-h-screen pt-20 flex items-center justify-center">
-                    <div className="text-center">
-                      <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Create Post</h1>
-                      <p className="text-gray-600 dark:text-gray-400">Coming soon...</p>
-                    </div>
-                  </div>
+                  <CreatePost />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Profile Pages */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Profile />
                 </Layout>
               </ProtectedRoute>
             }
           />
           
           <Route
-            path="/profile"
+            path="/profile/:userId"
             element={
-              <ProtectedRoute>
-                <Layout>
-                  <div className="min-h-screen pt-20 flex items-center justify-center">
-                    <div className="text-center">
-                      <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Profile</h1>
-                      <p className="text-gray-600 dark:text-gray-400">Coming soon...</p>
-                    </div>
-                  </div>
-                </Layout>
-              </ProtectedRoute>
+              <Layout>
+                <Profile />
+              </Layout>
             }
           />
           
@@ -165,12 +175,7 @@ function App() {
             element={
               <ProtectedRoute>
                 <Layout>
-                  <div className="min-h-screen pt-20 flex items-center justify-center">
-                    <div className="text-center">
-                      <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Settings</h1>
-                      <p className="text-gray-600 dark:text-gray-400">Coming soon...</p>
-                    </div>
-                  </div>
+                  <Settings />
                 </Layout>
               </ProtectedRoute>
             }

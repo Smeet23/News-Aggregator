@@ -37,10 +37,15 @@ router.get('/notifications', validateToken, getNotifications);
 
 
 router.get('/settings', validateToken, async(req, res) => {
-const user = await User.findById(req.user.id);
-console.log('Flash msg (GET):', req.flash('success_msg')); // Should show the message
- res.render('settings', { user });
-
+  const user = await User.findById(req.user.id).select('-password');
+  
+  // Return JSON for API requests
+  if (req.headers.accept && req.headers.accept.includes('application/json')) {
+    return res.json(user);
+  }
+  
+  console.log('Flash msg (GET):', req.flash('success_msg')); // Should show the message
+  res.render('settings', { user });
 });
 
 // Update user settings

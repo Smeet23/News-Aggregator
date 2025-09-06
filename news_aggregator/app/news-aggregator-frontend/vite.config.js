@@ -17,12 +17,32 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
-      '/home': {
+      '/home/posts': {
         target: 'http://localhost:3000',
         changeOrigin: true,
         secure: false,
       },
-      '/post': {
+      '/home/post': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/post/createpost': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/post/update': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/post/deletePost': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/post/upload': {
         target: 'http://localhost:3000',
         changeOrigin: true,
         secure: false,
