@@ -52,6 +52,12 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      '/api/profile': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      },
       '/comments': {
         target: 'http://localhost:3000',
         changeOrigin: true,

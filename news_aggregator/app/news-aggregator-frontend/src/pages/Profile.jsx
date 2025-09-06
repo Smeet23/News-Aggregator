@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
@@ -31,13 +31,14 @@ import {
   UserMinus,
   Check
 } from 'lucide-react';
-import { profileAPI, postAPI } from '../services/api';
+import { profileAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
 const Profile = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user: currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
@@ -54,67 +55,112 @@ const Profile = () => {
     likes: 0
   });
 
-  const isOwnProfile = !userId || userId === currentUser?.id;
+  // Determine if this is the user's own profile
+  // Either we're on /myprofile route OR the userId matches current user
+  const isOwnProfile = location.pathname === '/myprofile' || (!userId || userId === currentUser?.id || userId === currentUser?._id);
 
   useEffect(() => {
     fetchProfile();
-  }, [userId]);
+  }, [userId, location.pathname]);
 
   const fetchProfile = async () => {
     setLoading(true);
     try {
-      // Fetch profile data
-      const profileRes = userId 
-        ? await profileAPI.getProfile(userId)
-        : await profileAPI.getMyProfile();
+      // First, try to fetch profile data
+      let profileData = null;
       
-      if (profileRes.data) {
-        setProfile(profileRes.data);
+      // Check if this is the user's own profile page
+      const isMyProfile = location.pathname === '/myprofile' || !userId;
+      
+      try {
+        console.log('Fetching profile. IsMyProfile:', isMyProfile, 'UserId:', userId);
+        
+        // If we're on /myprofile route or no userId, fetch current user's profile
+        const profileRes = isMyProfile
+          ? await profileAPI.getMyProfile()
+          : await profileAPI.getProfile(userId);
+        
+        console.log('Profile response:', profileRes);
+        
+        // Check if backend wants us to redirect
+        if (profileRes.data?.redirect) {
+          navigate(profileRes.data.redirectTo, { replace: true });
+          return;
+        }
+        
+        if (profileRes.data) {
+          profileData = profileRes.data;
+          setProfile(profileData);
+        }
+      } catch (profileError) {
+        console.error('Error fetching profile data:', profileError);
+        // Continue with current user data if available
+        profileData = {
+          _id: currentUser?.id || currentUser?._id,
+          name: currentUser?.name || 'User',
+          username: currentUser?.username,
+          email: currentUser?.email
+        };
+        setProfile(profileData);
       }
 
-      // Fetch all posts
-      const postsRes = await postAPI.getAllPosts();
-      
-      // The backend returns { posts: [...] } structure
-      const allPosts = postsRes.data?.posts || postsRes.data || [];
-      
-      // Filter posts for this user - backend uses 'userid' field
-      const targetUserId = userId || currentUser?.id || profileRes.data?._id;
-      const userPosts = allPosts.filter(post => {
-        // Check if post.userid matches (backend field name)
-        return post.userid === targetUserId || post.userid?._id === targetUserId;
-      });
-      
-      // Transform posts to consistent format
-      const transformedPosts = userPosts.map(post => ({
-        id: post._id,
-        _id: post._id,
-        title: post.title,
-        content: post.content,
-        author: post.userid,
-        createdAt: post.createdAt,
-        likes: post.upvote || 0,
-        dislikes: post.downvote || 0,
-        comments: post.noofreplies || 0,
-        views: post.views || 0
-      }));
-      
-      setPosts(transformedPosts);
+      // Always fetch user's posts, even if profile fetch failed
+      try {
+        // Determine which user's posts to fetch
+        const targetUserId = isMyProfile ? null : userId;
+        
+        console.log('Fetching posts for:', isMyProfile ? 'current user' : `user ${targetUserId}`);
+        
+        const postsRes = await profileAPI.getUserPosts(targetUserId);
+        
+        console.log('Posts response:', postsRes);
+        
+        // The backend returns { posts: [...] } structure
+        const userPosts = postsRes.data?.posts || [];
+        
+        console.log(`Fetched ${userPosts.length} posts`);
+        
+        // Transform posts to consistent format
+        const transformedPosts = userPosts.map(post => ({
+          id: post._id,
+          _id: post._id,
+          title: post.title || 'Untitled',
+          content: post.content || '',
+          author: post.userid,
+          createdAt: post.createdAt || new Date(),
+          likes: post.upvote || 0,
+          dislikes: post.downvote || 0,
+          comments: post.noofreplies || 0,
+          views: post.views || 0
+        }));
+        
+        setPosts(transformedPosts);
 
-      // Set stats
-      setStats({
-        posts: transformedPosts.length,
-        followers: profileRes.data?.followers?.length || 0,
-        following: profileRes.data?.following?.length || 0,
-        likes: transformedPosts.reduce((total, post) => total + post.likes, 0)
-      });
+        // Set stats
+        setStats({
+          posts: transformedPosts.length,
+          followers: profileData?.followers?.length || 0,
+          following: profileData?.following?.length || 0,
+          likes: transformedPosts.reduce((total, post) => total + post.likes, 0)
+        });
 
-      // Check if current user is following this profile
-      if (!isOwnProfile && currentUser) {
-        setIsFollowing(profileRes.data?.followers?.includes(currentUser.id));
+        // Check if current user is following this profile
+        if (!isOwnProfile && currentUser) {
+          setIsFollowing(profileData?.followers?.includes(currentUser.id));
+        }
+      } catch (postsError) {
+        console.error('Error fetching posts:', postsError);
+        // Use empty posts array if fetch fails
+        setPosts([]);
+        setStats({
+          posts: 0,
+          followers: profileData?.followers?.length || 0,
+          following: profileData?.following?.length || 0,
+          likes: 0
+        });
       }
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      console.error('Error in fetchProfile:', error);
       // Use mock data for now
       setProfile({
         id: userId || currentUser?.id,

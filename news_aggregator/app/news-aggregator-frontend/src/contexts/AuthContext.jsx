@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { authAPI } from '../services/api';
+import { authAPI, profileAPI } from '../services/api';
 import toast from 'react-hot-toast';
 
 const AuthContext = createContext(null);
@@ -25,8 +25,25 @@ export const AuthProvider = ({ children }) => {
     try {
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
-        setUser(JSON.parse(storedUser));
+        const userData = JSON.parse(storedUser);
+        setUser(userData);
         setIsAuthenticated(true);
+        
+        // If user doesn't have an ID, try to fetch it from profile
+        if (!userData.id && !userData._id) {
+          try {
+            const profileResponse = await profileAPI.getMyProfile();
+            const updatedUserData = {
+              ...userData,
+              id: profileResponse.data._id || profileResponse.data.id,
+              username: profileResponse.data.username || userData.username
+            };
+            localStorage.setItem('user', JSON.stringify(updatedUserData));
+            setUser(updatedUserData);
+          } catch (error) {
+            console.error('Failed to fetch user profile:', error);
+          }
+        }
       }
     } catch (error) {
       console.error('Auth check failed:', error);
@@ -41,37 +58,66 @@ export const AuthProvider = ({ children }) => {
       
       // Check if login was successful
       if (response.data && response.data.message === 'Successfully logged in') {
-        // Try to get stored registration data or use email prefix
-        const storedRegData = localStorage.getItem('lastRegistration');
-        let userData;
-        
-        if (storedRegData) {
-          const regData = JSON.parse(storedRegData);
-          if (regData.email === credentials.email) {
+        // After successful login, fetch user profile to get complete user data
+        try {
+          const profileResponse = await profileAPI.getMyProfile();
+          const userData = {
+            id: profileResponse.data._id || profileResponse.data.id,
+            email: profileResponse.data.email,
+            name: profileResponse.data.name,
+            username: profileResponse.data.username
+          };
+          
+          // Store user data
+          localStorage.setItem('user', JSON.stringify(userData));
+          setUser(userData);
+          setIsAuthenticated(true);
+          
+          toast.success('Login successful!');
+          return { success: true };
+        } catch (profileError) {
+          console.error('Failed to fetch profile after login:', profileError);
+          // Fallback if profile fetch fails - try to extract from login response
+          const storedRegData = localStorage.getItem('lastRegistration');
+          let userData;
+          
+          if (response.data.user) {
+            // If login response contains user data
             userData = {
-              email: credentials.email,
-              name: regData.name
+              id: response.data.user._id || response.data.user.id,
+              email: response.data.user.email || credentials.email,
+              name: response.data.user.name || credentials.email.split('@')[0],
+              username: response.data.user.username
             };
+          } else if (storedRegData) {
+            const regData = JSON.parse(storedRegData);
+            if (regData.email === credentials.email) {
+              userData = {
+                email: credentials.email,
+                name: regData.name,
+                username: regData.username
+              };
+            } else {
+              userData = {
+                email: credentials.email,
+                name: credentials.email.split('@')[0]
+              };
+            }
           } else {
             userData = {
               email: credentials.email,
               name: credentials.email.split('@')[0]
             };
           }
-        } else {
-          userData = {
-            email: credentials.email,
-            name: credentials.email.split('@')[0]
-          };
+          
+          // Store user data
+          localStorage.setItem('user', JSON.stringify(userData));
+          setUser(userData);
+          setIsAuthenticated(true);
+          
+          toast.success('Login successful!');
+          return { success: true };
         }
-        
-        // Store user data
-        localStorage.setItem('user', JSON.stringify(userData));
-        setUser(userData);
-        setIsAuthenticated(true);
-        
-        toast.success('Login successful!');
-        return { success: true };
       }
       
       return { success: false, error: 'Login failed' };
@@ -89,7 +135,8 @@ export const AuthProvider = ({ children }) => {
       // Store registration data temporarily for login
       localStorage.setItem('lastRegistration', JSON.stringify({
         email: userData.email,
-        name: userData.name
+        name: userData.name,
+        username: userData.username
       }));
       
       toast.success('Registration successful! Please login.');

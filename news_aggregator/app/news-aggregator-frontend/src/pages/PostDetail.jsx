@@ -280,12 +280,37 @@ const PostDetail = () => {
 
   const fetchPost = async () => {
     try {
+      console.log('Fetching post with ID:', id);
       const response = await postAPI.getPost(id);
-      setPost(response.data);
+      console.log('Post response:', response.data);
+      
+      // Handle different response formats
+      const postData = response.data?.post || response.data;
+      
+      if (!postData) {
+        throw new Error('Post not found');
+      }
+      
+      // Transform the post data to ensure consistency
+      const transformedPost = {
+        ...postData,
+        _id: postData._id || id,
+        title: postData.title || 'Untitled',
+        content: postData.content || '',
+        author: postData.user || postData.author || { name: 'Unknown' },
+        upvote: postData.upvote || 0,
+        downvote: postData.downvote || 0,
+        noofreplies: postData.noofreplies || 0,
+        createdAt: postData.createdAt || new Date()
+      };
+      
+      setPost(transformedPost);
     } catch (error) {
       console.error('Error fetching post:', error);
-      toast.error('Failed to load post');
-      navigate('/');
+      console.error('Error response:', error.response);
+      toast.error(`Failed to load post: ${error.response?.data?.error || error.message}`);
+      // Don't navigate away immediately - let user see the error
+      setTimeout(() => navigate('/'), 3000);
     } finally {
       setLoading(false);
     }

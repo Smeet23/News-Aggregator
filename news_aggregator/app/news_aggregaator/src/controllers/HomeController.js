@@ -43,12 +43,22 @@ const PostPage =  async (req, res) => {
         const postid = req.params._id;
         
         const post = await Post.findById(postid).lean();
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+        
         const useris = post.userid;
         const user = await User.findById(useris).select('_id name');
         console.log(user);
 
-        res.render('postpage',{post,user}); 
-        console.log("Post send");
+        // Return JSON for API requests
+        res.json({ 
+            post: {
+                ...post,
+                user: user
+            }
+        }); 
+        console.log("Post sent as JSON");
 
     } catch (error) {
         console.error(error);

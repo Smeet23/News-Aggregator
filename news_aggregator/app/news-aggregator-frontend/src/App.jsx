@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 // Layout Components
 import Navbar from './components/common/Navbar';
+import ProfileRedirect from './components/ProfileRedirect';
 
 // Page Components
 import Home from './pages/Home';
@@ -150,8 +151,9 @@ function App() {
           />
           
           {/* Profile Pages */}
+          {/* My Profile Route - shows current user's profile */}
           <Route
-            path="/profile"
+            path="/myprofile"
             element={
               <ProtectedRoute>
                 <Layout>
@@ -161,11 +163,14 @@ function App() {
             }
           />
           
+          {/* User Profile Route - with redirect logic for own profile */}
           <Route
             path="/profile/:userId"
             element={
               <Layout>
-                <Profile />
+                <ProfileRedirect>
+                  <Profile />
+                </ProfileRedirect>
               </Layout>
             }
           />

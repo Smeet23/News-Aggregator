@@ -111,6 +111,8 @@ const Settings = () => {
       const response = await authAPI.getSettings();
       const userData = response.data;
       
+      console.log('Settings data received:', userData); // Debug log
+      
       setFormData({
         name: userData.name || '',
         username: userData.username || '',
@@ -125,11 +127,11 @@ const Settings = () => {
         linkedin: userData.linkedin || '',
         notifyFollow: userData.notifyFollow !== false,
         notifyComment: userData.notifyComment !== false,
-        notifyMention: userData.notifyMention !== false,
+        notifyMention: userData.notifyMention !== undefined ? userData.notifyMention : true,
         notifyNewsletter: userData.notifyNewsletter || false,
-        profilePublic: userData.profilePublic !== false,
+        profilePublic: userData.profilePublic !== undefined ? userData.profilePublic : true,
         showEmail: userData.showEmail || false,
-        showActivity: userData.showActivity !== false,
+        showActivity: userData.showActivity !== undefined ? userData.showActivity : true,
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
@@ -144,7 +146,7 @@ const Settings = () => {
       setTheme(savedTheme);
     } catch (error) {
       console.error('Error fetching settings:', error);
-      toast.error('Failed to load settings');
+      toast.error(`Failed to load settings: ${error.response?.data?.error || error.message}`);
     } finally {
       setLoading(false);
     }
@@ -236,9 +238,13 @@ const Settings = () => {
         delete dataToSend.confirmPassword;
       }
       
+      console.log('Sending settings data:', dataToSend); // Debug log
+      
       const response = await authAPI.updateSettings(dataToSend);
       
-      if (response.data.success) {
+      console.log('Settings save response:', response.data); // Debug log
+      
+      if (response.data.success || response.data.user) {
         toast.success('Settings updated successfully');
         
         // If password was changed, redirect to login
@@ -252,6 +258,7 @@ const Settings = () => {
       }
     } catch (error) {
       console.error('Error saving settings:', error);
+      console.error('Error response:', error.response); // Debug log
       toast.error(error.response?.data?.error || 'Failed to save settings');
     } finally {
       setSaving(false);

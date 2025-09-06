@@ -238,7 +238,7 @@ const PostCard = ({ post, onVote }) => {
             </div>
             <div>
               <Link 
-                to={`/profile/${post.userid}`}
+                to={`/profile/${typeof post.userid === 'object' ? post.userid._id || post.userid : post.userid}`}
                 className="font-semibold text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400"
               >
                 {post.user?.name || 'Anonymous'}

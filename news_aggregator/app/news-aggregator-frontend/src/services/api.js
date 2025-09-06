@@ -86,7 +86,8 @@ export const searchAPI = {
 // Profile APIs
 export const profileAPI = {
   getProfile: (userId) => api.get(`/profile/${userId}`),
-  getMyProfile: () => api.get('/profile/'),
+  getMyProfile: () => api.get('/profile/me'),
+  getUserPosts: (userId) => userId ? api.get(`/profile/posts/${userId}`) : api.get('/profile/posts'),
   followUser: (userId) => api.post(`/profile/follow/${userId}`),
   unfollowUser: (userId) => api.post(`/profile/unfollow/${userId}`),
   getFollowers: (userId) => api.get(`/profile/followers/${userId}`),

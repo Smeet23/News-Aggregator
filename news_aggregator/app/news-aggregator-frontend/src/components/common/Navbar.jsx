@@ -164,13 +164,13 @@ const Navbar = () => {
                       <HeadlessMenu.Item>
                         {({ active }) => (
                           <Link
-                            to="/profile"
+                            to="/myprofile"
                             className={`${
                               active ? 'bg-gray-100 dark:bg-gray-700' : ''
                             } flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300`}
                           >
                             <User className="w-4 h-4 mr-3" />
-                            Profile
+                            My Profile
                           </Link>
                         )}
                       </HeadlessMenu.Item>
@@ -289,12 +289,12 @@ const Navbar = () => {
               {isAuthenticated && (
                 <div className="pt-4 space-y-2 border-t border-gray-200 dark:border-gray-800">
                   <Link
-                    to="/profile"
+                    to="/myprofile"
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                   >
                     <User className="w-5 h-5" />
-                    <span>Profile</span>
+                    <span>My Profile</span>
                   </Link>
                   <button
                     onClick={() => {
