@@ -5,15 +5,28 @@ const path = require('path');
 
 const SearchByKeyword = async (req, res) => {
     const keyword = req.params.keyword;
+    
+    // Sanitize input to prevent NoSQL injection
+    if (!keyword || typeof keyword !== 'string') {
+      return res.status(400).json({ error: 'Invalid search keyword' });
+    }
+    
+    // Escape special regex characters to prevent regex injection
+    const sanitizedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    
+    // Limit keyword length to prevent ReDoS attacks
+    if (sanitizedKeyword.length > 100) {
+      return res.status(400).json({ error: 'Search keyword too long' });
+    }
   
     try {
       // Find posts that contain the keyword in the title or content
       const posts = await Post.find({
         $or: [
-          { title: { $regex: keyword, $options: 'i' } }, // Case-insensitive search
-          { content: { $regex: keyword, $options: 'i' } }
+          { title: { $regex: sanitizedKeyword, $options: 'i' } }, // Case-insensitive search
+          { content: { $regex: sanitizedKeyword, $options: 'i' } }
         ]
-      });
+      }).limit(100); // Limit results to prevent memory issues
 
       // Extract user IDs from posts
     const userIds = posts.map(post => post.userid);
@@ -49,10 +62,23 @@ const SearchByKeyword = async (req, res) => {
   //controller for searching by username
   const SearchByUsername = async (req, res) => {
     const { username } = req.params;
+    
+    // Sanitize input to prevent NoSQL injection
+    if (!username || typeof username !== 'string') {
+      return res.status(400).json({ error: 'Invalid username' });
+    }
+    
+    // Escape special regex characters
+    const sanitizedUsername = username.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    
+    // Limit username length
+    if (sanitizedUsername.length > 50) {
+      return res.status(400).json({ error: 'Username too long' });
+    }
   
     try {
       // Find the user by username
-      const users = await User.find({ name: { $regex: username, $options: 'i' } })
+      const users = await User.find({ name: { $regex: sanitizedUsername, $options: 'i' } }).limit(50)
   
       if (!users) {
         return res.status(404).json({ error: 'User not found' });

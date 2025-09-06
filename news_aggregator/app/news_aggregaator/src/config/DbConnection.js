@@ -1,4 +1,4 @@
-require('dotenv').config(); // Load .env file
+// Environment variables are already loaded in index.js
 
 const mongoose = require('mongoose');
 

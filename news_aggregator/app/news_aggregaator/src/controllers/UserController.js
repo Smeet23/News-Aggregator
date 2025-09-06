@@ -1,6 +1,5 @@
 const User = require("../model/UserModel");
 const asyncHandler = require("express-async-handler");
-const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
 const sendEmail = require("../../utils/sendEmail");
 const path = require("path");
@@ -16,23 +15,20 @@ const registerUser = asyncHandler(async (req, res) => {
     return res.status(409).send({ message: "User already registered" }); 
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
-  console.log("password : ", hashedPassword);
-
+  // Password will be hashed automatically by the UserModel pre-save hook
   const user = await User.create({
     name,
     email,
-    password: hashedPassword,
+    password,
   });
-  console.log(user);
-
   if (user) {
     res
       .status(200)
       .json({
-        __id: user.id,
+        _id: user.id,
+        name: user.name,
         email: user.email,
-        password: user.hashedPassword,
+        message: "User registered successfully"
       });
     // res.render("login");
   } else {
@@ -53,7 +49,7 @@ const LoginUser = async (req, res) => {
 
   const user = await User.findOne({ email: email });
 
-  if (user && (await bcrypt.compare(password, user.password))) {
+  if (user && (await user.comparePassword(password))) {
     const accessToken = jwt.sign(
       {
         user: {
