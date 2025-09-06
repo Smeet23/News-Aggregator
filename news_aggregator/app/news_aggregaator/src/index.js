@@ -1,6 +1,24 @@
 const express = require("express");
-// require('ejs');
+const path = require("path");
+
+// Load environment variables FIRST, before anything else
+const envFile = process.env.NODE_ENV === 'production' 
+  ? 'prod.env' 
+  : 'dev.env';
+
+const dotenv = require("dotenv").config({
+  path: path.resolve(__dirname, `../config/${envFile}`),
+});
+
+if (dotenv.error) {
+  console.error(`⚠️  Could not load config/${envFile} file. Using default values.`);
+} else {
+  console.log(`✅ Loaded environment from config/${envFile}`);
+}
+
+// Now load database connection AFTER environment variables are loaded
 require("../src/config/DbConnection");
+
 const app = express();
 const jwt = require("jsonwebtoken");
 const session = require('express-session');
@@ -13,9 +31,14 @@ const validateToken = require("./middleware/validateToken");
 app.use(cookieParser());
 // Session setup
 app.use(session({
-  secret: 'your_secret_key', // change to a strong secret
+  secret: process.env.SESSION_SECRET || 'fallback_secret_key_change_this',
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
+  }
 }));
 
 // Flash messages
@@ -38,14 +61,6 @@ const HomeRoutes = require("./routes/HomeRoutes");
 const SearchRoutes = require("./routes/SearchRoutes");
 const CommentRoutes = require("./routes/CommentRoutes");
 const ProfileRoutes = require("./routes/ProfileRoutes");
-
-const path = require("path");
-
-
-console.log({ path: path.resolve(__dirname, "../.env") });
-const dotenv = require("dotenv").config({
-  path: path.resolve(__dirname, "../.env"),
-});
 
 app.set("view engine", "ejs"); // To parse .ejs from view
 

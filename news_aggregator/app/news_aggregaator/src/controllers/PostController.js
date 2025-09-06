@@ -87,6 +87,17 @@ const DeletePost = async (req, res) => {
       return res.status(400).json({ error: "Invalid Post ID" });
     }
 
+    // Find the post first
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    // CRITICAL: Check if the user owns this post
+    if (post.userid !== userId) {
+      return res.status(403).json({ error: "You are not authorized to delete this post" });
+    }
+
     // Check if the user exists
     const user = await User.findById(userId);
     if (!user) {

@@ -15,14 +15,15 @@ const { updateSettings, deleteAccount } = require('../controllers/settingControl
 const upload = require('../../utils/multer');
 const validateToken = require("../middleware/validateToken");
 const multer = require('multer');
+const { validateUserRegistration, validateUserLogin, validateProfileUpdate } = require("../middleware/validation");
 
 
 //For SignUp
 
-router.post("/register", registerUser);
+router.post("/register", validateUserRegistration, registerUser);
 
 //For login
-router.post("/login", LoginUser);
+router.post("/login", validateUserLogin, LoginUser);
 
 //Forgot Passowrd
 router.post("/forgotpassword/", ForgotPassword);
