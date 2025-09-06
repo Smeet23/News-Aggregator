@@ -38,18 +38,45 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       const response = await authAPI.login(credentials);
-      const { user, token } = response.data;
       
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
+      // Check if login was successful
+      if (response.data && response.data.message === 'Successfully logged in') {
+        // Try to get stored registration data or use email prefix
+        const storedRegData = localStorage.getItem('lastRegistration');
+        let userData;
+        
+        if (storedRegData) {
+          const regData = JSON.parse(storedRegData);
+          if (regData.email === credentials.email) {
+            userData = {
+              email: credentials.email,
+              name: regData.name
+            };
+          } else {
+            userData = {
+              email: credentials.email,
+              name: credentials.email.split('@')[0]
+            };
+          }
+        } else {
+          userData = {
+            email: credentials.email,
+            name: credentials.email.split('@')[0]
+          };
+        }
+        
+        // Store user data
+        localStorage.setItem('user', JSON.stringify(userData));
+        setUser(userData);
+        setIsAuthenticated(true);
+        
+        toast.success('Login successful!');
+        return { success: true };
+      }
       
-      setUser(user);
-      setIsAuthenticated(true);
-      
-      toast.success('Login successful!');
-      return { success: true };
+      return { success: false, error: 'Login failed' };
     } catch (error) {
-      const message = error.response?.data?.message || 'Login failed';
+      const message = error.response?.data?.error || error.response?.data?.message || 'Login failed';
       toast.error(message);
       return { success: false, error: message };
     }
@@ -57,7 +84,14 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await authAPI.register(userData);
+      await authAPI.register(userData);
+      
+      // Store registration data temporarily for login
+      localStorage.setItem('lastRegistration', JSON.stringify({
+        email: userData.email,
+        name: userData.name
+      }));
+      
       toast.success('Registration successful! Please login.');
       return { success: true };
     } catch (error) {

@@ -29,6 +29,7 @@ const Login = () => {
     
     if (result.success) {
       navigate('/');
+      window.location.reload(); // Force reload to update navbar
     }
     
     setLoading(false);
