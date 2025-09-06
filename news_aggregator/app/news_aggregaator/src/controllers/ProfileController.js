@@ -89,14 +89,10 @@ const getUserPosts = async (req, res) => {
     const userId = req.params._id || req.user.id;
     const Post = require("../model/PostModel");
     
-    console.log('Getting posts for user:', userId);
-    
     // Fetch posts for this user
     const posts = await Post.find({ userid: userId })
       .sort({ createdAt: -1 })
       .lean();
-    
-    console.log(`Found ${posts.length} posts for user ${userId}`);
     
     res.json({ 
       posts: posts,

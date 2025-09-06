@@ -166,6 +166,7 @@ const CreatePost = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState('');
+  const [postSubmitted, setPostSubmitted] = useState(false);
   
   const MAX_TITLE_LENGTH = 200;
   const MAX_CONTENT_LENGTH = 5000;
@@ -173,6 +174,9 @@ const CreatePost = () => {
 
   // Auto-save draft to localStorage
   useEffect(() => {
+    // Don't auto-save if post was already submitted
+    if (postSubmitted) return;
+    
     const timer = setTimeout(() => {
       if (formData.title || formData.content) {
         localStorage.setItem('postDraft', JSON.stringify(formData));
@@ -182,7 +186,7 @@ const CreatePost = () => {
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [formData]);
+  }, [formData, postSubmitted]);
 
   // Load draft on component mount
   useEffect(() => {
@@ -270,8 +274,12 @@ const CreatePost = () => {
       });
 
       if (response.data.success) {
-        // Clear draft
+        // Mark as submitted to prevent further auto-saves
+        setPostSubmitted(true);
+        
+        // Clear draft and reset form
         localStorage.removeItem('postDraft');
+        setFormData({ title: '', content: '', link: '' });
         
         toast.success('Post created successfully!');
         
@@ -551,11 +559,11 @@ const CreatePost = () => {
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Publishing as</h3>
               <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 bg-gradient-to-r from-primary-600 to-secondary-600 rounded-full flex items-center justify-center text-white font-semibold">
-                  {user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
+                  {user?.name?.charAt(0).toUpperCase() || user?.username?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900 dark:text-white">
-                    {user?.name || user?.email?.split('@')[0]}
+                    {user?.name || user?.username || user?.email?.split('@')[0] || 'User'}
                   </p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">{user?.email}</p>
                 </div>

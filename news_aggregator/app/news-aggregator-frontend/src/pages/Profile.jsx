@@ -41,6 +41,8 @@ const Profile = () => {
   const location = useLocation();
   const { user: currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [postsLoading, setPostsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
   const [followers, setFollowers] = useState([]);
@@ -65,6 +67,9 @@ const Profile = () => {
 
   const fetchProfile = async () => {
     setLoading(true);
+    setPostsLoading(true);
+    setError(null);
+    
     try {
       // First, try to fetch profile data
       let profileData = null;
@@ -73,14 +78,10 @@ const Profile = () => {
       const isMyProfile = location.pathname === '/myprofile' || !userId;
       
       try {
-        console.log('Fetching profile. IsMyProfile:', isMyProfile, 'UserId:', userId);
-        
         // If we're on /myprofile route or no userId, fetch current user's profile
         const profileRes = isMyProfile
           ? await profileAPI.getMyProfile()
           : await profileAPI.getProfile(userId);
-        
-        console.log('Profile response:', profileRes);
         
         // Check if backend wants us to redirect
         if (profileRes.data?.redirect) {
@@ -95,30 +96,32 @@ const Profile = () => {
       } catch (profileError) {
         console.error('Error fetching profile data:', profileError);
         // Continue with current user data if available
-        profileData = {
-          _id: currentUser?.id || currentUser?._id,
-          name: currentUser?.name || 'User',
-          username: currentUser?.username,
-          email: currentUser?.email
-        };
-        setProfile(profileData);
+        if (isMyProfile && currentUser) {
+          profileData = {
+            _id: currentUser?.id || currentUser?._id,
+            name: currentUser?.name || 'User',
+            username: currentUser?.username,
+            email: currentUser?.email
+          };
+          setProfile(profileData);
+        } else {
+          setError('Failed to load profile');
+          setLoading(false);
+          return;
+        }
       }
+
+      setLoading(false);
 
       // Always fetch user's posts, even if profile fetch failed
       try {
         // Determine which user's posts to fetch
         const targetUserId = isMyProfile ? null : userId;
         
-        console.log('Fetching posts for:', isMyProfile ? 'current user' : `user ${targetUserId}`);
-        
         const postsRes = await profileAPI.getUserPosts(targetUserId);
-        
-        console.log('Posts response:', postsRes);
         
         // The backend returns { posts: [...] } structure
         const userPosts = postsRes.data?.posts || [];
-        
-        console.log(`Fetched ${userPosts.length} posts`);
         
         // Transform posts to consistent format
         const transformedPosts = userPosts.map(post => ({
@@ -148,8 +151,11 @@ const Profile = () => {
         if (!isOwnProfile && currentUser) {
           setIsFollowing(profileData?.followers?.includes(currentUser.id));
         }
+        
+        setPostsLoading(false);
       } catch (postsError) {
         console.error('Error fetching posts:', postsError);
+        toast.error('Failed to load posts');
         // Use empty posts array if fetch fails
         setPosts([]);
         setStats({
@@ -158,9 +164,12 @@ const Profile = () => {
           following: profileData?.following?.length || 0,
           likes: 0
         });
+        setPostsLoading(false);
       }
     } catch (error) {
       console.error('Error in fetchProfile:', error);
+      setError('Something went wrong');
+      toast.error('Failed to load profile');
       // Use mock data for now
       setProfile({
         id: userId || currentUser?.id,
@@ -309,6 +318,13 @@ const Profile = () => {
               <div className="flex items-center space-x-3 mt-4 md:mt-0">
                 {isOwnProfile ? (
                   <>
+                    <Link
+                      to="/create-post"
+                      className="px-6 py-2 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg hover:from-primary-700 hover:to-primary-800 transition-all flex items-center space-x-2"
+                    >
+                      <FileText className="w-4 h-4" />
+                      <span>Create Post</span>
+                    </Link>
                     <Link
                       to="/settings"
                       className="px-6 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center space-x-2"
@@ -529,7 +545,40 @@ const Profile = () => {
                   exit={{ opacity: 0, y: -20 }}
                   className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'space-y-4'}
                 >
-                  {posts.map((post) => (
+                  {postsLoading ? (
+                    // Loading skeleton for posts
+                    Array.from({ length: 4 }).map((_, index) => (
+                      <div key={index} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6 animate-pulse">
+                        <div className="h-6 bg-gray-200 dark:bg-gray-600 rounded w-3/4 mb-3" />
+                        <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-full mb-2" />
+                        <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-5/6 mb-4" />
+                        <div className="flex items-center space-x-4">
+                          <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-16" />
+                          <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-16" />
+                          <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-16" />
+                        </div>
+                      </div>
+                    ))
+                  ) : posts.length === 0 ? (
+                    // Empty state
+                    <div className="col-span-full text-center py-12">
+                      <FileText className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No posts yet</h3>
+                      <p className="text-gray-600 dark:text-gray-400">
+                        {isOwnProfile ? "You haven't created any posts yet." : "This user hasn't posted anything yet."}
+                      </p>
+                      {isOwnProfile && (
+                        <Link
+                          to="/create-post"
+                          className="mt-4 inline-flex items-center px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg hover:from-primary-700 hover:to-primary-800 transition-all"
+                        >
+                          <FileText className="w-4 h-4 mr-2" />
+                          Create your first post
+                        </Link>
+                      )}
+                    </div>
+                  ) : (
+                    posts.map((post) => (
                     <motion.div
                       key={post.id}
                       whileHover={{ scale: 1.02 }}
@@ -567,7 +616,8 @@ const Profile = () => {
                         </div>
                       </div>
                     </motion.div>
-                  ))}
+                    ))
+                  )}
                 </motion.div>
               )}
 

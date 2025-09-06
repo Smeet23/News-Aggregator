@@ -228,7 +228,7 @@ const PostCard = ({ post, onVote }) => {
           <div className="flex items-center space-x-3">
             <div className="relative">
               <div className="w-10 h-10 bg-gradient-to-r from-primary-600 to-secondary-600 rounded-full flex items-center justify-center text-white font-semibold">
-                {post.user?.name?.charAt(0).toUpperCase() || 'U'}
+                {post.user?.name?.charAt(0).toUpperCase() || post.user?.username?.charAt(0).toUpperCase() || post.user?.email?.charAt(0).toUpperCase() || 'U'}
               </div>
               {post.user?.isVerified && (
                 <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
@@ -241,7 +241,7 @@ const PostCard = ({ post, onVote }) => {
                 to={`/profile/${typeof post.userid === 'object' ? post.userid._id || post.userid : post.userid}`}
                 className="font-semibold text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400"
               >
-                {post.user?.name || 'Anonymous'}
+                {post.user?.name || post.user?.username || post.user?.email?.split('@')[0] || 'Anonymous'}
               </Link>
               <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
                 <span>{formatDate(post.createdAt)}</span>
