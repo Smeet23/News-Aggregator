@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NewsHub - Your News Aggregator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -233,9 +235,17 @@
         }
 
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
 
         /* Main Content */
@@ -332,7 +342,8 @@
             gap: 0.5rem;
         }
 
-        .sort-btn.active, .sort-btn:hover {
+        .sort-btn.active,
+        .sort-btn:hover {
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             border-color: transparent;
@@ -511,8 +522,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         /* Empty State */
@@ -633,7 +649,12 @@
             }
         }
     </style>
+
+    <script defer data-website-id="68c51cfc6d64bed7fd6d113d" data-domain="news-aggregator-ewj4.onrender.com"
+        src="https://datafa.st/js/script.js">
+        </script>
 </head>
+
 <body>
     <!-- Enhanced Navbar -->
     <nav class="navbar" id="navbar">
@@ -710,7 +731,8 @@
             <div class="filter-controls">
                 <div class="search-box">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" class="search-input" placeholder="Search posts, authors, or topics..." id="searchInput">
+                    <input type="text" class="search-input" placeholder="Search posts, authors, or topics..."
+                        id="searchInput">
                 </div>
                 <div class="sort-controls">
                     <button class="sort-btn active" data-sort="latest">
@@ -791,7 +813,7 @@
                 menuIcon.classList.add('fa-bars');
             });
         });
-        
+
         class NewsHomepage {
             constructor() {
                 this.posts = [];
@@ -831,7 +853,7 @@
                     const baseurl = window.location.origin;
                     const response = await fetch(`${baseurl}/home/posts/`);
                     const data = await response.json();
-                    
+
                     this.posts = data.posts || [];
                     this.filteredPosts = [...this.posts];
                     this.hideLoading();
@@ -871,7 +893,7 @@
 
             renderPosts() {
                 const container = document.getElementById('postsContainer');
-                
+
                 if (this.filteredPosts.length === 0) {
                     container.innerHTML = `
                         <div class="empty-state">
@@ -929,16 +951,16 @@
 
             getTimeAgo(dateString) {
                 if (!dateString) return 'Just now';
-                
+
                 const now = new Date();
                 const postDate = new Date(dateString);
                 const diffInSeconds = Math.floor((now - postDate) / 1000);
-                
+
                 if (diffInSeconds < 60) return 'Just now';
                 if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
                 if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
                 if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
-                
+
                 return postDate.toLocaleDateString();
             }
 
@@ -980,12 +1002,12 @@
 
             // Here you would typically make an API call to handle the vote
             console.log(`${voteType} for post ${postId}`);
-            
+
             // For demo purposes, just show feedback
             const countElement = voteElement.querySelector('.reaction-count');
             const currentCount = parseInt(countElement.textContent);
             countElement.textContent = currentCount + 1;
-            
+
             // You can add your actual voting logic here
             // fetch(`/posts/${postId}/${voteType}`, { method: 'POST' })...
         }
@@ -1017,11 +1039,12 @@
         setTimeout(() => {
             document.querySelectorAll('.post-card').forEach((card, index) => {
                 card.style.opacity = '0';
-                card.style.transform = 'translateY(30px)'; 
+                card.style.transform = 'translateY(30px)';
                 card.style.transition = `all 0.6s ease ${index * 0.1}s`;
                 observer.observe(card);
             });
         }, 100);
     </script>
 </body>
+
 </html>
