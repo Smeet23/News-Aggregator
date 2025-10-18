@@ -42,7 +42,10 @@ const requestLogger = (req, res, next) => {
   // Add response time header
   res.on('finish', () => {
     const duration = Date.now() - start;
-    res.setHeader('X-Response-Time', duration);
+    // Don't set headers after response is sent
+    if (!res.headersSent) {
+      res.setHeader('X-Response-Time', duration);
+    }
     
     // Log response with color coding based on status
     const status = res.statusCode;
